@@ -1,0 +1,66 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Order Tracker
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Order Tracker</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="tracker-container">
+    <!-- Active Order Section -->
+    <div *ngIf="getActiveOrder() as activeOrder" class="active-order-section">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Current Order</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h2>Order ID: {{ activeOrder.id }}</h2>
+              <p>Status: <strong>{{ getStatusText(activeOrder.status) }}</strong></p>
+              <p *ngIf="activeOrder.etaMinutes">ETA: <strong>{{ activeOrder.etaMinutes }} min</strong></p>
+              <p *ngIf="activeOrder.fakeCourierName">Courier: <strong>{{ activeOrder.fakeCourierName }}</strong></p>
+            </ion-label>
+          </ion-item>
+          <ion-button 
+            *ngIf="canCancel(activeOrder)"
+            expand="block" 
+            color="danger" 
+            (click)="cancelOrder(activeOrder)"
+            class="cancel-button">
+            Cancel Order
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Order History Section -->
+    <div class="order-history-section">
+      <h2>Order History</h2>
+      <div *ngIf="orders.length === 0" class="no-orders">
+        <p>No orders yet. Place an order to see it here.</p>
+      </div>
+      <ion-card *ngFor="let order of orders" class="order-card">
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h2>Order ID: {{ order.id }}</h2>
+              <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
+              <p *ngIf="order.etaMinutes">ETA: {{ order.etaMinutes }} min</p>
+              <p *ngIf="order.fakeCourierName">Courier: {{ order.fakeCourierName }}</p>
+              <p class="order-time">Placed: {{ formatDate(order.placedAt) }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
+

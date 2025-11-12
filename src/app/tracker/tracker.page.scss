@@ -1,0 +1,45 @@
+.tracker-container {
+  padding: 16px;
+}
+
+.active-order-section {
+  margin-bottom: 24px;
+}
+
+.order-history-section {
+  h2 {
+    margin: 16px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.no-orders {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ion-color-medium);
+}
+
+.order-card {
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.cancel-button {
+  margin-top: 16px;
+}
+
+.order-time {
+  font-size: 0.875rem;
+  color: var(--ion-color-medium);
+  margin-top: 8px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
