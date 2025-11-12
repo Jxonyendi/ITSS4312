@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h3>Trusted Contacts</h3>
+  <ion-list>
+    <ion-item *ngFor="let c of contacts">
+      <ion-label>
+        <h3>{{c.name}}</h3>
+        <p>{{c.phone}}</p>
+      </ion-label>
+      <ion-button slot="end" color="danger" (click)="remove(c.id)">Remove</ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ion-item>
+    <ion-input placeholder="Name" [(ngModel)]="newName"></ion-input>
+    <ion-input placeholder="Phone" [(ngModel)]="newPhone"></ion-input>
+    <ion-button (click)="add()">Add</ion-button>
+  </ion-item>
+
+  <h3>Prewritten Messages</h3>
+  <ion-list>
+    <ion-item *ngFor="let m of messages; let i = index">
+      <ion-label>{{m}}</ion-label>
+      <ion-button slot="end" (click)="sendPreview(i)">Send preview</ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

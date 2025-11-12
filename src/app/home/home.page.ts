@@ -1,10 +1,14 @@
 import { Component } from '@angular/core';
-import { EmergencyService } from '../services/emergency.service';
+import { EmergencyService } from '../services/emergency.services';
 import { ToastController } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea } from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
-  templateUrl: 'home.page.html'
+  templateUrl: 'home.page.html',
+  standalone: true,
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, CommonModule]
 })
 export class HomePage {
   preview = '';

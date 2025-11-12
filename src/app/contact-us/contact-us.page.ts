@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
-import { EmergencyService } from '../services/emergency.service';
+import { EmergencyService } from '../services/emergency.services';
 import { ToastController } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-contact-us',
-  templateUrl: 'contact-us.page.html'
+  templateUrl: 'contact-us.page.html',
+  standalone: true,
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButton]
 })
 export class ContactUsPage {
   constructor(private svc: EmergencyService, private toast: ToastController) {}

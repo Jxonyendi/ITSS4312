@@ -7,6 +7,31 @@ export const routes: Routes = [
     component: TabsPage,
     children: [
       {
+        path: 'home',
+        loadComponent: () =>
+          import('../home/home.page').then((m) => m.HomePage),
+      },
+      {
+        path: 'order',
+        loadComponent: () =>
+          import('../orders/tab4.page').then((m) => m.OrderPage),
+      },
+      {
+        path: 'tracker',
+        loadComponent: () =>
+          import('../tracker/tracker.page').then((m) => m.TrackerPage),
+      },
+      {
+        path: 'account',
+        loadComponent: () =>
+          import('../account/account.page').then((m) => m.AccountPage),
+      },
+      {
+        path: 'contact-us',
+        loadComponent: () =>
+          import('../contact-us/contact-us.page').then((m) => m.ContactUsPage),
+      },
+      {
         path: 'tab1',
         loadComponent: () =>
           import('../tab1/tab1.page').then((m) => m.Tab1Page),
@@ -22,20 +47,15 @@ export const routes: Routes = [
           import('../tab3/tab3.page').then((m) => m.Tab3Page),
       },
       {
-        path: 'tracker',
-        loadComponent: () =>
-          import('../tracker/tracker.page').then((m) => m.TrackerPage),
-      },
-      {
         path: '',
-        redirectTo: '/tabs/tab1',
+        redirectTo: '/tabs/home',
         pathMatch: 'full',
       },
     ],
   },
   {
     path: '',
-    redirectTo: '/tabs/tab1',
+    redirectTo: '/tabs/home',
     pathMatch: 'full',
   },
 ];

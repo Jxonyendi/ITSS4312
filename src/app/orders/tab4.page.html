@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Place Order</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Place Pizza Order</h2>
+  <p>Place an order to simulate the emergency dispatch system.</p>
+
+  <ion-button expand="block" (click)="placeOrder()">
+    Place Order
+  </ion-button>
+
+  <div *ngIf="lastOrder" style="margin-top: 20px;">
+    <p><strong>Last Order:</strong> {{ lastOrder.id }}</p>
+    <p><strong>Status:</strong> {{ lastOrder.status }}</p>
+  </div>
+</ion-content>
+
