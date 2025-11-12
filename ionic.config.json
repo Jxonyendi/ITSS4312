@@ -1,0 +1,7 @@
+{
+  "name": "pizza-time",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
