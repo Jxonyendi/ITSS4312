@@ -1,0 +1,30 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-title>Pizza Time</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Quick Actions</h2>
+  <p>Use these to covertly notify trusted contacts.</p>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" (click)="sendOk()" >
+          I'm okay (discreet)
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button color="danger" expand="block" (click)="sendHelp()">
+          I need help (discreet)
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-item>
+    <ion-label>Message preview</ion-label>
+    <ion-textarea [value]="preview" readonly></ion-textarea>
+  </ion-item>
+</ion-content>
