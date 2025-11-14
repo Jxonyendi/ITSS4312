@@ -14,6 +14,12 @@ export interface Order {
   placedAt: number;
   etaMinutes?: number;
   fakeCourierName?: string;
+  // Optional pizza metadata for orders created from the pizza menu
+  pizzaId?: string;
+  pizzaName?: string;
+  pizzaImage?: string;
+  pizzaPrice?: number;
+  note?: string;
 }
 
 @Injectable({
@@ -75,6 +81,33 @@ export class EmergencyService {
       placedAt: Date.now(),
       etaMinutes: 15,
       fakeCourierName: 'Maya'
+    };
+    const currentOrders = this.orders$.value;
+    this.orders$.next([order, ...currentOrders]);
+    return order;
+  }
+
+  /**
+   * Place an order that includes pizza metadata (used by the pizza menu)
+   */
+  async placePizzaOrder(payload: {
+    pizzaId: string;
+    pizzaName: string;
+    pizzaImage?: string;
+    pizzaPrice?: number;
+    note?: string;
+  }): Promise<Order> {
+    const order: Order = {
+      id: Math.random().toString(36).substring(2, 15),
+      status: 'placed',
+      placedAt: Date.now(),
+      etaMinutes: 15,
+      fakeCourierName: 'Maya',
+      pizzaId: payload.pizzaId,
+      pizzaName: payload.pizzaName,
+      pizzaImage: payload.pizzaImage,
+      pizzaPrice: payload.pizzaPrice,
+      note: payload.note,
     };
     const currentOrders = this.orders$.value;
     this.orders$.next([order, ...currentOrders]);
