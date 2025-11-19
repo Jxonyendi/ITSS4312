@@ -1,20 +1,82 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Place Order</ion-title>
+    <ion-title>Domino's Orders</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <h2>Place Pizza Order</h2>
-  <p>Place an order to simulate the emergency dispatch system.</p>
+<ion-content class="order-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">Domino's Tracker Enabled</p>
+    <h1>Choose a specialty pizza, just like the Domino's app.</h1>
+    <p class="supporting">
+      Tap a pie to load its details, add a quick delivery note, and send it through our mock tracker.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">30-min delivery promise*</ion-chip>
+      <ion-chip color="light">Real-time courier tracker</ion-chip>
+    </div>
+  </section>
 
-  <ion-button expand="block" (click)="placeOrder()">
-    Place Order
-  </ion-button>
+  <section class="menu-grid">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" size-lg="4" *ngFor="let pizza of specialtyPizzas">
+          <ion-card (click)="selectPizza(pizza)" [class.selected]="selectedPizza?.id === pizza.id">
+            <div class="card-image">
+              <img [src]="pizza.image" [alt]="pizza.name" loading="lazy" />
+              <ion-chip *ngIf="pizza.tag" color="danger" class="card-chip">{{ pizza.tag }}</ion-chip>
+            </div>
+            <ion-card-header>
+              <ion-card-title>{{ pizza.name }}</ion-card-title>
+              <ion-card-subtitle>{{ pizza.crust }} • {{ pizza.calories }} cal/slice</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ pizza.description }}</p>
+              <div class="price-row">
+                <span class="price">{{ pizza.price | currency: 'USD' }}</span>
+                <span class="tap-to-select">Tap to select</span>
+                <ion-button fill="clear" size="small" color="primary" (click)="addToOrders(pizza, $event)">Add</ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </section>
 
-  <div *ngIf="lastOrder" style="margin-top: 20px;">
-    <p><strong>Last Order:</strong> {{ lastOrder.id }}</p>
-    <p><strong>Status:</strong> {{ lastOrder.status }}</p>
-  </div>
+  <section class="order-panel" *ngIf="selectedPizza">
+    <div class="order-details">
+      <div>
+        <div class="selected-label">Selected pie</div>
+        <h2>{{ selectedPizza.name }}</h2>
+        <p>{{ selectedPizza.description }}</p>
+      </div>
+      <div class="order-meta">
+        <span>{{ selectedPizza.crust }}</span>
+        <span>{{ selectedPizza.calories }} cal/slice</span>
+        <span class="price">{{ selectedPizza.price | currency: 'USD' }}</span>
+      </div>
+    </div>
+
+    <ion-item lines="none" class="note-field">
+      <ion-label position="stacked">Delivery note</ion-label>
+      <ion-textarea
+        rows="3"
+        placeholder="Gate code, napkins, leave on porch..."
+        [(ngModel)]="note"
+      ></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="block" size="large" (click)="placeOrder()">
+      Place {{ selectedPizza.name }} Order
+    </ion-button>
+
+    <div class="last-order" *ngIf="lastOrder">
+      <div class="status-label">Last mock order</div>
+      <div class="status-detail">
+        #{{ lastOrder.id }} • {{ lastOrder.status }} • {{ lastOrder.fakeCourierName }}
+      </div>
+    </div>
+  </section>
 </ion-content>
 

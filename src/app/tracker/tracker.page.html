@@ -50,11 +50,16 @@
       <ion-card *ngFor="let order of orders" class="order-card">
         <ion-card-content>
           <ion-item lines="none">
+            <ion-thumbnail slot="start" *ngIf="order.pizzaImage">
+              <img [src]="order.pizzaImage" alt="{{ order.pizzaName }}" />
+            </ion-thumbnail>
             <ion-label>
               <h2>Order ID: {{ order.id }}</h2>
+              <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong> — {{ order.pizzaPrice | currency:'USD' }}</p>
               <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
               <p *ngIf="order.etaMinutes">ETA: {{ order.etaMinutes }} min</p>
               <p *ngIf="order.fakeCourierName">Courier: {{ order.fakeCourierName }}</p>
+              <p *ngIf="order.note">Note: {{ order.note }}</p>
               <p class="order-time">Placed: {{ formatDate(order.placedAt) }}</p>
             </ion-label>
           </ion-item>
