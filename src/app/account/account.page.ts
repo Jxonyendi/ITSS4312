@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EmergencyService, Contact } from '../services/emergency.services';
+import { AuthService } from '../services/auth.service';
 import { ToastController } from '@ionic/angular';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonInput } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
@@ -16,10 +17,18 @@ export class AccountPage {
   newName = '';
   newPhone = '';
   messages: string[] = [];
+  currentUser: any = null;
 
-  constructor(private svc: EmergencyService, private toast: ToastController) {
+  constructor(
+    private svc: EmergencyService,
+    private authService: AuthService,
+    private toast: ToastController
+  ) {
     this.svc.contacts$.subscribe(c => this.contacts = c);
     this.messages = this.svc.messages;
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
   add() {
@@ -39,6 +48,11 @@ export class AccountPage {
     const res = await this.svc.broadcastToContacts(i);
     console.log('preview', res);
     this.showToast('Preview sent to contacts (mock).');
+  }
+
+  logout() {
+    this.authService.logout();
+    this.showToast('Logged out successfully');
   }
 
   async showToast(msg:string) {
