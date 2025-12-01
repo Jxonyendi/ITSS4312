@@ -1,0 +1,79 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Pizza Time</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="login-content">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="pizza" class="logo-icon"></ion-icon>
+      <h1>Pizza Time</h1>
+      <p>Order your favorite pizza, track delivery in real-time</p>
+    </div>
+
+    <ion-card class="auth-card">
+      <ion-card-header>
+        <ion-card-title>{{ isLoginMode ? 'Welcome Back' : 'Create Account' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+          <ion-item>
+            <ion-icon name="person" slot="start"></ion-icon>
+            <ion-label position="stacked">Username</ion-label>
+            <ion-input
+              type="text"
+              [(ngModel)]="username"
+              name="username"
+              required
+              placeholder="Enter username"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="lock-closed" slot="start"></ion-icon>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input
+              type="password"
+              [(ngModel)]="password"
+              name="password"
+              required
+              placeholder="Enter password"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item *ngIf="!isLoginMode">
+            <ion-icon name="lock-closed" slot="start"></ion-icon>
+            <ion-label position="stacked">Confirm Password</ion-label>
+            <ion-input
+              type="password"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              required
+              placeholder="Confirm password"
+            ></ion-input>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="!authForm.valid"
+            class="submit-button"
+          >
+            {{ isLoginMode ? 'Login' : 'Register' }}
+          </ion-button>
+
+          <div class="toggle-mode">
+            <p>
+              {{ isLoginMode ? "Don't have an account?" : 'Already have an account?' }}
+              <a (click)="toggleMode()" class="toggle-link">
+                {{ isLoginMode ? 'Register' : 'Login' }}
+              </a>
+            </p>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
