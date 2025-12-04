@@ -2,6 +2,8 @@
 
 A full-featured pizza ordering application built with Ionic and Angular, featuring real-time order tracking, user authentication, and emergency contact features.
 
+> **👨‍💻 New to this project?** Start here: **[DEVELOPER_SETUP.md](./DEVELOPER_SETUP.md)** - Complete setup guide for localhost development
+
 ## Features
 
 ### Core Features
