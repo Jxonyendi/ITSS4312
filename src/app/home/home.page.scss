@@ -1,0 +1,309 @@
+:host {
+  ion-content {
+    --background: #f6f6f6;
+  }
+}
+
+.home-content {
+  --background: #f6f6f6;
+}
+
+.hero {
+  background: linear-gradient(135deg, #e31837, #c1121f);
+  border-radius: 20px;
+  color: #fff;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 20px 45px rgba(227, 24, 55, 0.35);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '🍕';
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 4rem;
+    opacity: 0.2;
+  }
+
+  .eyebrow {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+
+  .supporting {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    opacity: 0.95;
+    line-height: 1.5;
+  }
+
+  .hero-chips ion-chip {
+    margin-right: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 32px 0 16px;
+  color: #1d1d1d;
+}
+
+.quick-order-section {
+  margin-bottom: 32px;
+
+  .quick-order-card {
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    text-align: center;
+    padding: 16px;
+    height: 100%;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &.emergency {
+      background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+      border: 2px solid #e31837;
+    }
+
+    .quick-order-icon {
+      font-size: 48px;
+      color: #e31837;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      margin: 8px 0 4px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1d1d1d;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  }
+}
+
+.featured-pizzas {
+  margin-bottom: 32px;
+
+  .pizza-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #e31837;
+      border-radius: 3px;
+    }
+
+    .pizza-card {
+      min-width: 280px;
+      max-width: 280px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      scroll-snap-align: start;
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      .pizza-image {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        border-radius: 18px 18px 0 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .pizza-tag {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          background: rgba(0, 0, 0, 0.7);
+          color: #fff;
+          font-weight: 600;
+          font-size: 0.75rem;
+        }
+      }
+
+      ion-card-header {
+        padding: 12px 16px 8px;
+      }
+
+      ion-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      ion-card-subtitle {
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .pizza-description {
+        font-size: 0.9rem;
+        color: #515151;
+        line-height: 1.4;
+        margin: 8px 0;
+      }
+
+      .pizza-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+
+        .price {
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: #e31837;
+        }
+      }
+    }
+  }
+}
+
+.deals-section {
+  margin-bottom: 32px;
+
+  .deal-card {
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff 0%, #fff9f0 100%);
+    border: 2px solid #ffd700;
+
+    .deal-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #e31837;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    ion-card-header {
+      padding-top: 40px;
+    }
+
+    ion-card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1d1d1d;
+    }
+
+    ion-card-subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .deal-price {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #e31837;
+      margin: 16px 0;
+
+      .deal-old-price {
+        font-size: 1rem;
+        color: #999;
+        text-decoration: line-through;
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.message-preview {
+  margin-bottom: 32px;
+
+  ion-card {
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    background: #fff9f0;
+
+    ion-card-header {
+      padding-bottom: 8px;
+    }
+
+    ion-card-subtitle {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    ion-card-content {
+      ion-textarea {
+        --padding-start: 12px;
+        --padding-end: 12px;
+        --padding-top: 12px;
+        --padding-bottom: 12px;
+        background: #fff;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .hero {
+    min-height: 220px;
+  }
+
+  .pizza-scroll {
+    .pizza-card {
+      min-width: 320px;
+      max-width: 320px;
+    }
+  }
+}
+

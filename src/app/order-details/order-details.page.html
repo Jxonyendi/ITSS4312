@@ -1,0 +1,118 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tracker"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="order-details-content ion-padding">
+  <div *ngIf="order" class="order-details-container">
+    <section class="hero">
+      <p class="eyebrow">Order Details</p>
+      <h1>Order #{{ order.id }}</h1>
+      <p class="supporting">
+        View complete details about your order, including status, delivery information, and courier details.
+      </p>
+      <div class="hero-chips">
+        <ion-chip [color]="getStatusColor(order.status)">{{ getStatusText(order.status) }}</ion-chip>
+        <ion-chip color="light" *ngIf="order.etaMinutes">{{ order.etaMinutes }} min ETA</ion-chip>
+      </div>
+    </section>
+
+    <!-- Order Header -->
+    <section class="order-header-section">
+      <ion-card class="order-header-card">
+      <ion-card-header>
+        <div class="order-id-section">
+          <h2>Order #{{ order.id }}</h2>
+          <ion-chip [color]="getStatusColor(order.status)">
+            <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
+            <span>{{ getStatusText(order.status) }}</span>
+          </ion-chip>
+        </div>
+      </ion-card-header>
+    </ion-card>
+    </section>
+
+    <!-- Pizza Information -->
+    <section class="pizza-info-section" *ngIf="order.pizzaName">
+      <h2 class="section-title">Pizza Details</h2>
+      <ion-card class="pizza-info-card">
+      <ion-card-header>
+        <ion-card-title>Pizza Details</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="pizza-image-section" *ngIf="order.pizzaImage">
+          <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" />
+        </div>
+        <ion-item lines="none">
+          <ion-label>
+            <h2>{{ order.pizzaName }}</h2>
+            <p *ngIf="order.pizzaPrice" class="price">{{ order.pizzaPrice | currency: 'USD' }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+    </section>
+
+    <!-- Order Information -->
+    <section class="order-info-section">
+      <h2 class="section-title">Order Information</h2>
+      <ion-card class="order-info-card">
+      <ion-card-header>
+        <ion-card-title>Order Information</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h3>Placed At</h3>
+            <p>{{ formatDate(order.placedAt) }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item *ngIf="order.etaMinutes" lines="none">
+          <ion-icon name="time-outline" slot="start" color="warning"></ion-icon>
+          <ion-label>
+            <h3>Estimated Delivery</h3>
+            <p>{{ order.etaMinutes }} minutes</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item *ngIf="order.fakeCourierName" lines="none">
+          <ion-icon name="person-outline" slot="start" color="tertiary"></ion-icon>
+          <ion-label>
+            <h3>Courier</h3>
+            <p>{{ order.fakeCourierName }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item *ngIf="order.note" lines="none">
+          <ion-icon name="location-outline" slot="start" color="success"></ion-icon>
+          <ion-label>
+            <h3>Delivery Note</h3>
+            <p>{{ order.note }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions-section" *ngIf="canCancel()">
+      <ion-button expand="block" color="danger" (click)="cancelOrder()">
+        Cancel Order
+      </ion-button>
+    </section>
+  </div>
+
+  <div *ngIf="!order" class="no-order">
+    <p>Order not found</p>
+    <ion-button (click)="goBack()">Back to Tracker</ion-button>
+  </div>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
+</ion-content>

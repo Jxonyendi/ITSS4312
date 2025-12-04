@@ -122,4 +122,67 @@
       Send Support Message (Mock)
     </ion-button>
   </section>
+
+  <!-- Email Form Modal -->
+  <ion-modal [isOpen]="isEmailModalOpen" (willDismiss)="closeEmailModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Send Email</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeEmailModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="stacked">Your Name *</ion-label>
+          <ion-input 
+            type="text" 
+            [(ngModel)]="emailForm.name" 
+            placeholder="Enter your name"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Your Email *</ion-label>
+          <ion-input 
+            type="email" 
+            [(ngModel)]="emailForm.email" 
+            placeholder="your.email@example.com"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Subject</ion-label>
+          <ion-input 
+            type="text" 
+            [(ngModel)]="emailForm.subject" 
+            placeholder="Support Request"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Message *</ion-label>
+          <ion-textarea 
+            rows="6" 
+            [(ngModel)]="emailForm.message" 
+            placeholder="Enter your message here..."
+          ></ion-textarea>
+        </ion-item>
+
+        <ion-button 
+          expand="block" 
+          size="large" 
+          (click)="sendEmail()"
+          [disabled]="!emailForm.name || !emailForm.email || !emailForm.message"
+        >
+          Send Email
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
 </ion-content>

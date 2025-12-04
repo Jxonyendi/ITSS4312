@@ -1,24 +1,29 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Order Tracker
-    </ion-title>
+    <ion-title>Order Tracker</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Order Tracker</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="tracker-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">Real-Time Tracking</p>
+    <h1>Track your orders</h1>
+    <p class="supporting">
+      Monitor your pizza orders in real-time. See live updates on delivery status and estimated arrival time.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">Live updates</ion-chip>
+      <ion-chip color="light">ETA tracking</ion-chip>
+    </div>
+  </section>
 
   <div class="tracker-container">
     <!-- Active Order Section -->
-    <div *ngIf="getActiveOrder() as activeOrder" class="active-order-section">
-      <ion-card>
+    <section class="active-order-section" *ngIf="getActiveOrder() as activeOrder">
+      <h2 class="section-title">Current Order</h2>
+      <ion-card class="active-order-card">
         <ion-card-header>
-          <ion-card-title>Current Order</ion-card-title>
+          <ion-card-title>Order #{{ activeOrder.id }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           <ion-item lines="none">
@@ -39,19 +44,19 @@
           </ion-button>
         </ion-card-content>
       </ion-card>
-    </div>
+    </section>
 
     <!-- Order History Section -->
-    <div class="order-history-section">
-      <h2>Order History</h2>
+    <section class="order-history-section">
+      <h2 class="section-title">Order History</h2>
       <div *ngIf="orders.length === 0" class="no-orders">
         <p>No orders yet. Place an order to see it here.</p>
       </div>
-      <ion-card *ngFor="let order of orders" class="order-card">
+      <ion-card *ngFor="let order of orders" class="order-card" (click)="viewOrderDetails(order.id)">
         <ion-card-content>
-          <ion-item lines="none">
+          <ion-item lines="none" button>
             <ion-thumbnail slot="start" *ngIf="order.pizzaImage">
-              <img [src]="order.pizzaImage" alt="{{ order.pizzaName }}" />
+              <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" decoding="async" />
             </ion-thumbnail>
             <ion-label>
               <h2>Order ID: {{ order.id }}</h2>
@@ -65,7 +70,10 @@
           </ion-item>
         </ion-card-content>
       </ion-card>
-    </div>
+    </section>
   </div>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
 </ion-content>
 

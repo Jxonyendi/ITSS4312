@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Order History</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="order-history-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">Order History</p>
+    <h1>Your order history</h1>
+    <p class="supporting">
+      View all your past orders, track spending, and manage your order history. Filter by status to find what you need.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">{{ getTotalOrders() }} total orders</ion-chip>
+      <ion-chip color="light">{{ getTotalSpent() | currency:'USD' }} spent</ion-chip>
+    </div>
+  </section>
+
+  <div class="history-container">
+    <!-- Statistics -->
+    <section class="stats-section">
+      <h2 class="section-title">Statistics</h2>
+      <ion-card class="stats-card">
+      <ion-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <h3>{{ getTotalOrders() }}</h3>
+            <p>Total Orders</p>
+          </div>
+          <div class="stat-item">
+            <h3>{{ getTotalSpent() | currency:'USD' }}</h3>
+            <p>Total Spent</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    </section>
+
+    <!-- Filter -->
+    <section class="filter-section">
+      <h2 class="section-title">Filter Orders</h2>
+      <ion-card>
+      <ion-card-content>
+        <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange($event)">
+          <ion-segment-button value="all">
+            <ion-label>All</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="delivered">
+            <ion-label>Delivered</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="cancelled">
+            <ion-label>Cancelled</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-card-content>
+    </ion-card>
+    </section>
+
+    <!-- Orders List -->
+    <section class="orders-list-section">
+      <h2 class="section-title">All Orders</h2>
+    <div *ngIf="filteredOrders.length === 0" class="no-orders">
+      <ion-card>
+        <ion-card-content>
+          <p>No orders found.</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card *ngFor="let order of filteredOrders" class="order-card" (click)="viewOrderDetails(order.id)">
+      <ion-card-content>
+        <ion-item lines="none" button>
+          <ion-thumbnail slot="start" *ngIf="order.pizzaImage">
+            <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" decoding="async" />
+          </ion-thumbnail>
+          <ion-label>
+            <div class="order-header">
+              <h2>Order #{{ order.id }}</h2>
+              <ion-chip [color]="getStatusColor(order.status)" size="small">
+                {{ getStatusText(order.status) }}
+              </ion-chip>
+            </div>
+            <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong></p>
+            <p *ngIf="order.pizzaPrice" class="price">{{ order.pizzaPrice | currency:'USD' }}</p>
+            <p class="order-time">{{ formatDate(order.placedAt) }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+    </section>
+  </div>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
+</ion-content>
+

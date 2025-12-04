@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Pizza Time</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="login-content">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="pizza" class="logo-icon"></ion-icon>
+      <h1>Pizza Time</h1>
+      <p>Order your favorite pizza, track delivery in real-time</p>
+    </div>
+
+    <ion-card class="auth-card">
+      <ion-card-header>
+        <ion-card-title>{{ isLoginMode ? 'Welcome Back' : 'Create Account' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+          <ion-item [class.ion-invalid]="username?.invalid && username?.touched">
+            <ion-icon name="person" slot="start"></ion-icon>
+            <ion-label position="stacked">Username</ion-label>
+            <ion-input
+              type="text"
+              formControlName="username"
+              placeholder="Enter username (3-20 chars)"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="username?.invalid && username?.touched">
+              {{ getUsernameErrorMessage() }}
+            </ion-note>
+          </ion-item>
+
+          <ion-item *ngIf="!isLoginMode" [class.ion-invalid]="email?.invalid && email?.touched">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-label position="stacked">Email (Optional)</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              placeholder="Enter email address"
+              inputmode="email"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="email?.invalid && email?.touched">
+              {{ getEmailErrorMessage() }}
+            </ion-note>
+          </ion-item>
+
+          <ion-item [class.ion-invalid]="password?.invalid && password?.touched">
+            <ion-icon name="lock-closed" slot="start"></ion-icon>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input
+              type="password"
+              formControlName="password"
+              placeholder="Enter password (min 6 chars)"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="password?.invalid && password?.touched">
+              {{ getPasswordErrorMessage() }}
+            </ion-note>
+          </ion-item>
+
+          <ion-item *ngIf="!isLoginMode" [class.ion-invalid]="(authForm.hasError('passwordMismatch') || confirmPassword?.invalid) && confirmPassword?.touched">
+            <ion-icon name="lock-closed" slot="start"></ion-icon>
+            <ion-label position="stacked">Confirm Password</ion-label>
+            <ion-input
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="(authForm.hasError('passwordMismatch') || confirmPassword?.invalid) && confirmPassword?.touched">
+              {{ getConfirmPasswordErrorMessage() }}
+            </ion-note>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="authForm.invalid"
+            class="submit-button"
+          >
+            {{ isLoginMode ? 'Login' : 'Register' }}
+          </ion-button>
+
+          <!-- Register/Login Toggle -->
+          <div class="toggle-mode">
+            <ion-button
+              *ngIf="isLoginMode"
+              expand="block"
+              fill="outline"
+              color="primary"
+              (click)="toggleMode()"
+              class="toggle-button"
+            >
+              <ion-icon name="person-add-outline" slot="start"></ion-icon>
+              Create New Account
+            </ion-button>
+            <ion-button
+              *ngIf="!isLoginMode"
+              expand="block"
+              fill="outline"
+              color="medium"
+              (click)="toggleMode()"
+              class="toggle-button"
+            >
+              <ion-icon name="log-in-outline" slot="start"></ion-icon>
+              Back to Login
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+

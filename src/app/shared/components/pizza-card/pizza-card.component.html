@@ -1,0 +1,29 @@
+<ion-card [class.selected]="isSelected" (click)="onCardClick()">
+  <div class="card-image">
+    <img [src]="pizza.image" [alt]="pizza.name" loading="lazy" />
+    <ion-chip *ngIf="pizza.tag" color="danger" class="card-chip">
+      {{ pizza.tag }}
+    </ion-chip>
+  </div>
+  <ion-card-header>
+    <ion-card-title>{{ pizza.name }}</ion-card-title>
+    <ion-card-subtitle>{{ pizza.crust }} • {{ pizza.calories }} cal/slice</ion-card-subtitle>
+  </ion-card-header>
+  <ion-card-content>
+    <p>{{ pizza.description }}</p>
+    <div class="price-row">
+      <span class="price">{{ pizza.price | currency: 'USD' }}</span>
+      <span class="tap-to-select" *ngIf="!showAddButton">Tap to select</span>
+      <ion-button
+        *ngIf="showAddButton"
+        fill="clear"
+        size="small"
+        color="primary"
+        (click)="onAddClick($event)"
+      >
+        Add
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>
+

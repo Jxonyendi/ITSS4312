@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonItem, IonLabel, IonThumbnail } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonItem, IonLabel, IonThumbnail, IonChip } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { EmergencyService, Order } from '../services/emergency.services';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 
 @Component({
   selector: 'app-tracker',
@@ -22,7 +24,9 @@ import { Subscription } from 'rxjs';
     IonItem, 
       IonLabel,
       IonThumbnail,
-    CommonModule
+    IonChip,
+    CommonModule,
+    ChatWidgetComponent
   ],
   standalone: true
 })
@@ -32,7 +36,8 @@ export class TrackerPage implements OnInit, OnDestroy {
 
   constructor(
     private emergencyService: EmergencyService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -97,8 +102,8 @@ export class TrackerPage implements OnInit, OnDestroy {
         },
         {
           text: 'Yes',
-          handler: () => {
-            this.emergencyService.setOrderStatus('cancelled');
+          handler: async () => {
+            await this.emergencyService.setOrderStatus('cancelled');
           }
         }
       ]
@@ -113,6 +118,13 @@ export class TrackerPage implements OnInit, OnDestroy {
   formatDate(timestamp: number): string {
     const date = new Date(timestamp);
     return date.toLocaleString();
+  }
+
+  /**
+   * Navigate to order details page
+   */
+  viewOrderDetails(orderId: string) {
+    this.router.navigate(['/order-details', orderId]);
   }
 }
 

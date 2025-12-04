@@ -35,3 +35,250 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/**
+ * Global App Styles
+ * -----------------------------------------------------
+ */
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+p {
+  line-height: 1.6;
+  color: var(--ion-text-color);
+}
+
+/* Form Inputs - Keyboard Handling */
+ion-input, ion-textarea {
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+/* Ensure forms don't get covered by keyboard */
+ion-content {
+  --keyboard-offset: 0px;
+}
+
+/* Keyboard handling for forms */
+ion-item {
+  --min-height: 56px;
+}
+
+/* Scroll to input when focused */
+ion-input:focus,
+ion-textarea:focus {
+  scroll-margin-top: 100px;
+}
+
+/* Card Styling */
+ion-card {
+  border-radius: var(--ion-border-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin: 16px;
+}
+
+/* Button Styling */
+ion-button {
+  --border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* List Styling */
+ion-list {
+  background: transparent;
+}
+
+ion-item {
+  --border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+/* Image Optimization */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Lazy Loading for Images */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+
+/* Image Optimization */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Performance: Reduce repaints */
+ion-card img {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 992px;
+  }
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Focus States for Accessibility */
+ion-button:focus-visible,
+ion-item:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+}
+
+/* Error States */
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Success States */
+.success-message {
+  color: var(--ion-color-success);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Landscape Mode Adjustments */
+@media (orientation: landscape) {
+  ion-header {
+    ion-toolbar {
+      --min-height: 44px;
+    }
+  }
+
+  /* Reduce padding in landscape for more content */
+  ion-content {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+
+  /* Stack forms vertically in landscape */
+  .login-container,
+  .form-container {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* Portrait Mode Optimizations */
+@media (orientation: portrait) {
+  /* Ensure full height in portrait */
+  ion-content {
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+  }
+}
+
+/* Keyboard Handling - Ensure inputs are visible */
+@media (max-height: 600px) {
+  /* Landscape on small screens */
+  ion-content {
+    --keyboard-offset: 0px;
+  }
+
+  ion-item {
+    --min-height: 48px;
+  }
+}
+
+/* Prevent Text Selection on Buttons */
+ion-button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth Scrolling */
+ion-content {
+  --overflow: auto;
+}
+
+/* Performance Optimizations */
+* {
+  /* GPU acceleration for better performance */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Reduce layout shifts */
+ion-card,
+ion-item {
+  contain: layout style paint;
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Chip Styling */
+ion-chip {
+  font-weight: 600;
+  --border-radius: 16px;
+}
+
+/* Segment Styling */
+ion-segment {
+  --background: var(--ion-color-light);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+ion-segment-button {
+  --border-radius: 6px;
+  min-height: 36px;
+}

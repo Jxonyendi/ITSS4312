@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiUrl: 'http://localhost:3000/api', // Backend API URL
+  useBackend: true, // Set to true to use backend API instead of localStorage
+  geminiApiKey: '', // Add your Gemini API key here (get it from https://aistudio.google.com/app/apikey)
 };
 
 /*

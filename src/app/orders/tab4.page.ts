@@ -20,9 +20,14 @@ import {
   IonItem,
   IonLabel,
   IonTextarea,
+  IonNote,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { addIcons } from 'ionicons';
+import { checkmarkCircleOutline } from 'ionicons/icons';
+import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 
 interface SpecialtyPizza {
   id: string;
@@ -33,6 +38,7 @@ interface SpecialtyPizza {
   price: number;
   image: string;
   tag?: string;
+  tagPosition?: 'left' | 'right';
 }
 
 @Component({
@@ -57,8 +63,11 @@ interface SpecialtyPizza {
     IonItem,
     IonLabel,
     IonTextarea,
+    IonNote,
+    IonIcon,
     CommonModule,
     FormsModule,
+    ChatWidgetComponent,
   ],
 })
 export class OrderPage {
@@ -70,8 +79,9 @@ export class OrderPage {
       crust: 'Hand Tossed',
       calories: 320,
       price: 14.99,
-      image: 'https://images.unsplash.com/photo-1548365328-9f547b5746ef?auto=format&fit=crop&w=800&q=80',
+      image: 'assets/images/pizza/ultimate-pepperoni.jpg',
       tag: 'Fan Favorite',
+      tagPosition: 'left',
     },
     {
       id: 'extravaganza',
@@ -80,7 +90,7 @@ export class OrderPage {
       crust: 'Crunchy Thin',
       calories: 340,
       price: 16.79,
-      image: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=800&q=80',
+      image: 'assets/images/pizza/extravaganza.jpg',
     },
     {
       id: 'memphis-bbq',
@@ -89,8 +99,9 @@ export class OrderPage {
       crust: 'Handmade Pan',
       calories: 310,
       price: 15.49,
-      image: 'https://images.unsplash.com/photo-1506354666786-959d6d497f1a?auto=format&fit=crop&w=800&q=80',
+      image: 'assets/images/pizza/memphis-bbq.jpg',
       tag: 'Limited Time',
+      tagPosition: 'right',
     },
     {
       id: 'pacific-veggie',
@@ -99,7 +110,7 @@ export class OrderPage {
       crust: 'Gluten Free',
       calories: 290,
       price: 15.09,
-      image: 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?auto=format&fit=crop&w=800&q=80',
+      image: 'assets/images/pizza/pacific-veggie.jpg',
     },
     {
       id: 'philly-steak',
@@ -108,8 +119,7 @@ export class OrderPage {
       crust: 'Brooklyn Style',
       calories: 330,
       price: 17.29,
-      // Use Unsplash source with query to better match a cheesesteak-pizza image
-      image: 'https://source.unsplash.com/800x600/?cheesesteak,pizza',
+      image: 'assets/images/pizza/philly-steak.jpg',
     },
     {
       id: 'deluxe',
@@ -118,15 +128,20 @@ export class OrderPage {
       crust: 'Hand Tossed',
       calories: 305,
       price: 14.49,
-      image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+      image: 'assets/images/pizza/deluxe.jpg',
     },
   ];
   selectedPizza: SpecialtyPizza = this.specialtyPizzas[0];
   alias = this.selectedPizza.name;
   note = '';
+  maxNoteLength = 200;
   lastOrder: any = null;
 
   constructor(private svc: EmergencyService, private toast: ToastController, private router: Router) {
+    addIcons({
+      'checkmark-circle-outline': checkmarkCircleOutline,
+    });
+    
     const os = this.svc.getOrders();
     this.lastOrder = os.length ? os[0] : null;
     this.svc.orders$.subscribe(o => {
@@ -137,6 +152,13 @@ export class OrderPage {
   selectPizza(pizza: SpecialtyPizza) {
     this.selectedPizza = pizza;
     this.alias = pizza.name;
+    // Scroll to order panel
+    setTimeout(() => {
+      const panel = document.querySelector('.order-panel');
+      if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   /**
@@ -154,9 +176,8 @@ export class OrderPage {
       pizzaPrice: pizza.price,
       note: ''
     };
-    const order = await this.svc.placePizzaOrder(payload);
+    await this.svc.placePizzaOrder(payload);
     this.showToast(`${pizza.name} added to orders. Opening tracker...`);
-    console.log('Quick-placed pizza order', order);
     this.router.navigate(['/tabs/tracker']);
   }
 
@@ -165,17 +186,23 @@ export class OrderPage {
       this.showToast('Pick a specialty pizza to continue.');
       return;
     }
+    
+    // Validate note length
+    if (this.note && this.note.length > this.maxNoteLength) {
+      this.showToast(`Delivery note must be ${this.maxNoteLength} characters or less.`);
+      return;
+    }
+    
     // Place a pizza order with metadata so it appears in the tracker
     const payload = {
       pizzaId: this.selectedPizza.id,
       pizzaName: this.selectedPizza.name,
       pizzaImage: this.selectedPizza.image,
       pizzaPrice: this.selectedPizza.price,
-      note: this.note || ''
+      note: (this.note || '').trim()
     };
-    const order = await this.svc.placePizzaOrder(payload);
+    await this.svc.placePizzaOrder(payload);
     this.showToast(`${this.selectedPizza.name} added to orders. Opening tracker...`);
-    console.log('Placed pizza order', order, 'note:', this.note, 'alias:', this.alias);
     this.note = '';
     // Navigate to tracker tab so user can see the order
     this.router.navigate(['/tabs/tracker']);

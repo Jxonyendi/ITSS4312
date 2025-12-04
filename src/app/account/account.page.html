@@ -4,29 +4,120 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <h3>Trusted Contacts</h3>
-  <ion-list>
-    <ion-item *ngFor="let c of contacts">
-      <ion-label>
-        <h3>{{c.name}}</h3>
-        <p>{{c.phone}}</p>
-      </ion-label>
-      <ion-button slot="end" color="danger" (click)="remove(c.id)">Remove</ion-button>
-    </ion-item>
-  </ion-list>
+<ion-content class="account-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">Account Management</p>
+    <h1>Welcome, {{ currentUser?.username || 'User' }}!</h1>
+    <p class="supporting">
+      Manage your profile, trusted contacts, and emergency settings. Keep your information up to date for your safety.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">Secure & Private</ion-chip>
+      <ion-chip color="light">Trusted Contacts</ion-chip>
+  </div>
+  </section>
 
-  <ion-item>
-    <ion-input placeholder="Name" [(ngModel)]="newName"></ion-input>
-    <ion-input placeholder="Phone" [(ngModel)]="newPhone"></ion-input>
-    <ion-button (click)="add()">Add</ion-button>
-  </ion-item>
+  <section class="account-sections">
+    <h2 class="section-title">Trusted Contacts</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngFor="let c of contacts">
+          <ion-card class="contact-card">
+            <ion-card-header>
+              <ion-card-title>{{ c.name }}</ion-card-title>
+              <ion-card-subtitle>{{ c.phone }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="contact-actions">
+                <ion-button fill="outline" size="small" color="primary" (click)="edit(c)">
+                  Edit
+                </ion-button>
+                <ion-button fill="outline" size="small" color="danger" (click)="remove(c.id)">
+                  Remove
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
-  <h3>Prewritten Messages</h3>
-  <ion-list>
-    <ion-item *ngFor="let m of messages; let i = index">
-      <ion-label>{{m}}</ion-label>
-      <ion-button slot="end" (click)="sendPreview(i)">Send preview</ion-button>
-    </ion-item>
-  </ion-list>
+    <ion-card class="add-contact-card">
+    <ion-card-header>
+      <ion-card-title>{{ editingContact ? 'Edit Contact' : 'Add New Contact' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="contactForm">
+        <ion-item [class.ion-invalid]="name?.invalid && name?.touched">
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input
+            formControlName="name"
+            placeholder="Enter contact name (2-50 chars)"
+          ></ion-input>
+          <ion-note slot="error" *ngIf="name?.invalid && name?.touched">
+            {{ getNameErrorMessage() }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="phone?.invalid && phone?.touched">
+          <ion-label position="stacked">Phone Number</ion-label>
+          <ion-input
+            formControlName="phone"
+            type="tel"
+            placeholder="Enter phone (e.g., 123-456-7890)"
+          ></ion-input>
+          <ion-note slot="error" *ngIf="phone?.invalid && phone?.touched">
+            {{ getPhoneErrorMessage() }}
+          </ion-note>
+        </ion-item>
+
+        <div class="form-actions">
+          <ion-button
+            expand="block"
+            (click)="editingContact ? update() : add()"
+            [disabled]="contactForm.invalid"
+          >
+            {{ editingContact ? 'Update Contact' : 'Add Contact' }}
+          </ion-button>
+          <ion-button
+            *ngIf="editingContact"
+            expand="block"
+            fill="outline"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  </section>
+
+  <section class="messages-section">
+    <h2 class="section-title">Prewritten Messages</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngFor="let m of messages; let i = index">
+          <ion-card class="message-card">
+            <ion-card-content>
+              <p class="message-text">{{ m }}</p>
+              <ion-button expand="block" fill="outline" size="small" (click)="sendPreview(i)">
+                Send Preview
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </section>
+
+  <section class="logout-section">
+    <ion-button expand="block" color="danger" size="large" (click)="logout()">
+      Logout
+    </ion-button>
+  </section>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
 </ion-content>

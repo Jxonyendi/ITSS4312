@@ -1,0 +1,61 @@
+<!-- Live Chat Widget -->
+<div class="chat-widget" [class.open]="isChatOpen">
+  <!-- Chat Toggle Button (when closed) -->
+  <div class="chat-toggle" *ngIf="!isChatOpen" (click)="openChat()">
+    <ion-icon name="chatbubble-outline"></ion-icon>
+    <span>Chat</span>
+  </div>
+
+  <!-- Chat Window (when open) -->
+  <div class="chat-window" *ngIf="isChatOpen">
+    <div class="chat-header">
+      <div class="chat-header-content">
+        <ion-icon name="chatbubble-outline"></ion-icon>
+        <span>Live Chat Support</span>
+      </div>
+      <ion-button fill="clear" size="small" (click)="closeChat()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="chat-messages">
+      <div 
+        *ngFor="let message of chatMessages" 
+        class="chat-message"
+        [class.user]="message.role === 'user'"
+        [class.assistant]="message.role === 'assistant'"
+      >
+        <div class="message-content" [innerHTML]="formatMessageContent(message.content)"></div>
+        <div class="message-time">
+          {{ formatChatTime(message.timestamp) }}
+        </div>
+      </div>
+      <div *ngIf="isSendingMessage" class="chat-message assistant">
+        <div class="message-content typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-input-container">
+      <ion-item lines="none" class="chat-input-item">
+        <ion-textarea
+          [(ngModel)]="currentMessage"
+          placeholder="Type your message..."
+          rows="1"
+          (keydown.enter)="sendChatMessage()"
+          [disabled]="isSendingMessage"
+        ></ion-textarea>
+      </ion-item>
+      <ion-button 
+        fill="solid" 
+        color="primary" 
+        (click)="sendChatMessage()"
+        [disabled]="!currentMessage.trim() || isSendingMessage"
+      >
+        <ion-icon name="send-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+</div>
+

@@ -1,7 +1,13 @@
 import { Component, EnvironmentInjector, inject } from '@angular/core';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { triangle, ellipse, square } from 'ionicons/icons';
+import { 
+  homeOutline, 
+  pizzaOutline, 
+  locateOutline, 
+  personCircleOutline, 
+  helpCircleOutline 
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
@@ -13,6 +19,12 @@ export class TabsPage {
   public environmentInjector = inject(EnvironmentInjector);
 
   constructor() {
-    addIcons({ triangle, ellipse, square });
+    addIcons({ 
+      'home-outline': homeOutline,
+      'pizza-outline': pizzaOutline,
+      'locate-outline': locateOutline,
+      'person-circle-outline': personCircleOutline,
+      'help-circle-outline': helpCircleOutline
+    });
   }
 }

@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
-import { ToastController } from '@ionic/angular';
+import { ToastController, LoadingController } from '@ionic/angular';
+import { ApiService } from '../services/api.service';
+import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { firstValueFrom } from 'rxjs';
 import {
   IonHeader,
   IonToolbar,
@@ -22,13 +25,19 @@ import {
   IonIcon,
   IonAccordion,
   IonAccordionGroup,
+  IonModal,
+  IonInput,
+  IonHeader as IonModalHeader,
+  IonToolbar as IonModalToolbar,
+  IonTitle as IonModalTitle,
+  IonButtons,
+  IonContent as IonModalContent,
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
   chatbubbleOutline,
-  callOutline,
   mailOutline,
   helpCircleOutline,
   documentTextOutline,
@@ -36,6 +45,8 @@ import {
   checkmarkCircleOutline,
   closeCircleOutline,
   hourglassOutline,
+  closeOutline,
+  sendOutline,
 } from 'ionicons/icons';
 
 interface SupportOption {
@@ -97,8 +108,16 @@ interface SupportRequest {
     IonIcon,
     IonAccordion,
     IonAccordionGroup,
+    IonModal,
+    IonInput,
+    IonModalHeader,
+    IonModalToolbar,
+    IonModalTitle,
+    IonButtons,
+    IonModalContent,
     CommonModule,
     FormsModule,
+    ChatWidgetComponent,
   ],
 })
 export class ContactUsPage {
@@ -130,15 +149,6 @@ export class ContactUsPage {
   ];
 
   contactMethods: ContactMethod[] = [
-    {
-      id: 'phone',
-      title: 'Phone Support',
-      info: '1-800-PIZZA-01',
-      hours: 'Available 24/7',
-      icon: 'call-outline',
-      color: 'success',
-      buttonText: 'Call Now',
-    },
     {
       id: 'email',
       title: 'Email Support',
@@ -213,11 +223,23 @@ export class ContactUsPage {
 
   selectedOption: SupportOption | null = null;
   supportMessage: string = '';
-
-  constructor(private svc: EmergencyService, private toast: ToastController) {
+  isEmailModalOpen = false;
+  emailForm = {
+    name: '',
+    email: '',
+    subject: 'Support Request',
+    message: ''
+  };
+  
+  constructor(
+    private svc: EmergencyService, 
+    private toast: ToastController,
+    private loadingCtrl: LoadingController,
+    private apiService: ApiService
+  ) {
+    // Register icons
     addIcons({
       'chatbubble-outline': chatbubbleOutline,
-      'call-outline': callOutline,
       'mail-outline': mailOutline,
       'help-circle-outline': helpCircleOutline,
       'document-text-outline': documentTextOutline,
@@ -225,6 +247,8 @@ export class ContactUsPage {
       'checkmark-circle-outline': checkmarkCircleOutline,
       'close-circle-outline': closeCircleOutline,
       'hourglass-outline': hourglassOutline,
+      'close-outline': closeOutline,
+      'send-outline': sendOutline,
     });
   }
 
@@ -243,19 +267,74 @@ export class ContactUsPage {
   }
 
   handleContactMethod(method: ContactMethod) {
-    let message = '';
     switch (method.id) {
-      case 'phone':
-        message = `Calling ${method.info}... (Mock)`;
-        break;
       case 'email':
-        message = `Opening email client for ${method.info}... (Mock)`;
+        // Open email form modal
+        this.isEmailModalOpen = true;
         break;
+        
       case 'chat':
-        message = 'Starting live chat... (Mock)';
+        // Chat widget handles its own opening
+        // The widget is always available on the page
         break;
     }
-    this.showToast(message);
+  }
+
+  closeEmailModal() {
+    this.isEmailModalOpen = false;
+    this.emailForm = {
+      name: '',
+      email: '',
+      subject: 'Support Request',
+      message: ''
+    };
+  }
+
+  async sendEmail() {
+    // Validate form
+    if (!this.emailForm.name || !this.emailForm.email || !this.emailForm.message) {
+      this.showToast('Please fill in all required fields');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.emailForm.email)) {
+      this.showToast('Please enter a valid email address');
+      return;
+    }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Sending email...',
+    });
+    await loading.present();
+
+    try {
+      const response = await firstValueFrom(
+        this.apiService.post('contact/send-email', this.emailForm)
+      );
+      
+      await loading.dismiss();
+
+      if (response && response.success) {
+        this.showToast('Email sent successfully!');
+        this.closeEmailModal();
+      } else {
+        this.showToast(response?.message || 'Failed to send email. Please try again.');
+      }
+    } catch (error: any) {
+      await loading.dismiss();
+      console.error('Email error:', error);
+      
+      // Provide more specific error messages
+      if (error?.error?.message) {
+        this.showToast(error.error.message);
+      } else if (error?.message) {
+        this.showToast(error.message);
+      } else {
+        this.showToast('Failed to send email. Please check your connection and try again.');
+      }
+    }
   }
 
   async sendSupport() {
@@ -315,6 +394,43 @@ export class ContactUsPage {
       default:
         return 'medium';
     }
+  }
+
+  formatChatTime(timestamp: number): string {
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  }
+
+  formatMessageContent(content: string): string {
+    if (!content) return '';
+    
+    // Escape HTML to prevent XSS
+    let formatted = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Convert **bold** to <strong>
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert line breaks to <br> tags first
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    // Convert numbered lists (1. item) to proper list format
+    // Match pattern: <br>1. text<br> or start of string 1. text<br>
+    formatted = formatted.replace(/(?:<br>|^)(\d+)\.\s+([^<]+?)(?=<br>|$)/g, 
+      '<div class="list-item"><span class="list-number">$1.</span> <span class="list-text">$2</span></div>');
+    
+    // Clean up extra <br> tags around list items
+    formatted = formatted.replace(/<br><div class="list-item">/g, '<div class="list-item">');
+    formatted = formatted.replace(/<\/div><br>/g, '</div>');
+    formatted = formatted.replace(/<br><br>/g, '<br>');
+    
+    return formatted;
   }
 
   async showToast(msg: string) {
