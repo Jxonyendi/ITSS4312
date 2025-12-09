@@ -40,16 +40,16 @@
     <section class="pizza-info-section" *ngIf="order.pizzaName">
       <h2 class="section-title">Pizza Details</h2>
       <ion-card class="pizza-info-card">
-        <ion-card-content>
-          <div class="pizza-image-section" *ngIf="order.pizzaImage">
-            <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" />
-          </div>
+      <ion-card-content>
+        <div class="pizza-image-section" *ngIf="order.pizzaImage">
+          <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" />
+        </div>
           <div class="pizza-details-content">
             <h2 class="pizza-name">{{ order.pizzaName }}</h2>
             <p *ngIf="order.pizzaPrice" class="price">{{ order.pizzaPrice | currency: 'USD' }}</p>
           </div>
-        </ion-card-content>
-      </ion-card>
+      </ion-card-content>
+    </ion-card>
     </section>
 
     <!-- Order Information -->

@@ -15,7 +15,10 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
-const db = require('./data-storage');
+
+// Use MongoDB if connection string is provided, otherwise fall back to file storage
+const useMongoDB = !!(process.env.MONGODB_URI || process.env.MONGODB_CONNECTION_STRING);
+const db = useMongoDB ? require('./mongo-storage') : require('./data-storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,7 +67,11 @@ app.get('/', (req, res) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'API is running', storage: 'JSON file storage' });
+  res.json({ 
+    success: true, 
+    message: 'API is running', 
+    storage: useMongoDB ? 'MongoDB Atlas' : 'JSON file storage' 
+  });
 });
 
 // Email configuration check (for debugging)
@@ -90,7 +97,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     // Check if user exists
-    const existingUser = db.findOne('users', { username: username.toLowerCase() });
+    const existingUser = await db.findOne('users', { username: username.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Username already exists' });
     }
@@ -105,7 +112,7 @@ app.post('/api/auth/register', async (req, res) => {
       password: hashedPassword
     };
 
-    const savedUser = db.insert('users', user);
+    const savedUser = await db.insert('users', user);
 
     // Generate token
     const token = jwt.sign(
@@ -134,7 +141,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Find user
-    const user = db.findOne('users', { username: username.toLowerCase() });
+    const user = await db.findOne('users', { username: username.toLowerCase() });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid username or password' });
     }
@@ -173,7 +180,7 @@ app.post('/api/auth/delete-account', authenticateToken, async (req, res) => {
     }
 
     // Find user
-    const user = db.findById('users', req.user.userId);
+    const user = await db.findById('users', req.user.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -185,15 +192,15 @@ app.post('/api/auth/delete-account', authenticateToken, async (req, res) => {
     }
 
     // Delete user
-    const deletedUser = db.findOneAndDelete('users', { _id: req.user.userId });
+    const deletedUser = await db.findOneAndDelete('users', { _id: req.user.userId });
     if (!deletedUser) {
       return res.status(500).json({ success: false, message: 'Failed to delete user' });
     }
 
     // Also delete user-related data (contacts and orders)
     const userId = req.user.userId;
-    db.delete('contacts', { userId });
-    db.delete('orders', { userId });
+    await db.delete('contacts', { userId });
+    await db.delete('orders', { userId });
 
     return res.json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {
@@ -204,7 +211,7 @@ app.post('/api/auth/delete-account', authenticateToken, async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const user = db.findById('users', req.user.userId);
+    const user = await db.findById('users', req.user.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -217,16 +224,16 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 });
 
 // Contacts Routes
-app.get('/api/contacts', authenticateToken, (req, res) => {
+app.get('/api/contacts', authenticateToken, async (req, res) => {
   try {
-    const contacts = db.find('contacts', { userId: req.user.userId });
+    const contacts = await db.find('contacts', { userId: req.user.userId });
     res.json({ success: true, data: contacts });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to get contacts', error: error.message });
   }
 });
 
-app.post('/api/contacts', authenticateToken, (req, res) => {
+app.post('/api/contacts', authenticateToken, async (req, res) => {
   try {
     const { name, phone, isPrimary } = req.body;
 
@@ -234,7 +241,7 @@ app.post('/api/contacts', authenticateToken, (req, res) => {
       return res.status(400).json({ success: false, message: 'Name and phone are required' });
     }
 
-    const contact = db.insert('contacts', {
+    const contact = await db.insert('contacts', {
       userId: req.user.userId,
       name,
       phone,
@@ -246,9 +253,9 @@ app.post('/api/contacts', authenticateToken, (req, res) => {
   }
 });
 
-app.put('/api/contacts/:id', authenticateToken, (req, res) => {
+app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
   try {
-    const contact = db.findOneAndUpdate(
+    const contact = await db.findOneAndUpdate(
       'contacts',
       { _id: req.params.id, userId: req.user.userId },
       req.body
@@ -262,9 +269,9 @@ app.put('/api/contacts/:id', authenticateToken, (req, res) => {
   }
 });
 
-app.delete('/api/contacts/:id', authenticateToken, (req, res) => {
+app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
   try {
-    const contact = db.findOneAndDelete('contacts', { _id: req.params.id, userId: req.user.userId });
+    const contact = await db.findOneAndDelete('contacts', { _id: req.params.id, userId: req.user.userId });
     if (!contact) {
       return res.status(404).json({ success: false, message: 'Contact not found' });
     }
@@ -275,9 +282,9 @@ app.delete('/api/contacts/:id', authenticateToken, (req, res) => {
 });
 
 // Orders Routes
-app.get('/api/orders', authenticateToken, (req, res) => {
+app.get('/api/orders', authenticateToken, async (req, res) => {
   try {
-    const orders = db.find('orders', { userId: req.user.userId });
+    const orders = await db.find('orders', { userId: req.user.userId });
     // Sort by placedAt descending (most recent first)
     orders.sort((a, b) => {
       const dateA = typeof a.placedAt === 'number' ? a.placedAt : new Date(a.placedAt).getTime();
@@ -290,23 +297,23 @@ app.get('/api/orders', authenticateToken, (req, res) => {
   }
 });
 
-app.post('/api/orders', authenticateToken, (req, res) => {
+app.post('/api/orders', authenticateToken, async (req, res) => {
   try {
     const orderData = {
       userId: req.user.userId,
       ...req.body,
       placedAt: req.body.placedAt || Date.now()
     };
-    const order = db.insert('orders', orderData);
+    const order = await db.insert('orders', orderData);
     res.json({ success: true, data: order, message: 'Order created' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create order', error: error.message });
   }
 });
 
-app.get('/api/orders/:id', authenticateToken, (req, res) => {
+app.get('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
-    const order = db.findOne('orders', { _id: req.params.id, userId: req.user.userId });
+    const order = await db.findOne('orders', { _id: req.params.id, userId: req.user.userId });
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -316,9 +323,9 @@ app.get('/api/orders/:id', authenticateToken, (req, res) => {
   }
 });
 
-app.put('/api/orders/:id', authenticateToken, (req, res) => {
+app.put('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
-    const order = db.findOneAndUpdate(
+    const order = await db.findOneAndUpdate(
       'orders',
       { _id: req.params.id, userId: req.user.userId },
       req.body
@@ -332,9 +339,9 @@ app.put('/api/orders/:id', authenticateToken, (req, res) => {
   }
 });
 
-app.delete('/api/orders/:id', authenticateToken, (req, res) => {
+app.delete('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
-    const order = db.findOneAndDelete('orders', { _id: req.params.id, userId: req.user.userId });
+    const order = await db.findOneAndDelete('orders', { _id: req.params.id, userId: req.user.userId });
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -497,6 +504,10 @@ app.post('/api/contact/send-email', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 API available at http://localhost:${PORT}/api`);
-  console.log('💾 Using JSON file storage (no MongoDB required)');
-  console.log(`📁 Data stored in: ${__dirname}/data/`);
+  if (useMongoDB) {
+    console.log('💾 Using MongoDB Atlas');
+  } else {
+    console.log('💾 Using JSON file storage (no MongoDB required)');
+    console.log(`📁 Data stored in: ${__dirname}/data/`);
+  }
 });
