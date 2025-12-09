@@ -163,6 +163,45 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Delete account
+app.post('/api/auth/delete-account', authenticateToken, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required' });
+    }
+
+    // Find user
+    const user = db.findById('users', req.user.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Verify password
+    const isValid = await bcrypt.compare(password, user.password || '');
+    if (!isValid) {
+      return res.status(401).json({ success: false, message: 'Invalid password' });
+    }
+
+    // Delete user
+    const deletedUser = db.findOneAndDelete('users', { _id: req.user.userId });
+    if (!deletedUser) {
+      return res.status(500).json({ success: false, message: 'Failed to delete user' });
+    }
+
+    // Also delete user-related data (contacts and orders)
+    const userId = req.user.userId;
+    db.delete('contacts', { userId });
+    db.delete('orders', { userId });
+
+    return res.json({ success: true, message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete account', error: error.message });
+  }
+});
+
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
     const user = db.findById('users', req.user.userId);

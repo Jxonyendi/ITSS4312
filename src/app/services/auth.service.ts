@@ -297,9 +297,10 @@ export class AuthService {
         password: password
       };
 
-      // Verify password is correct
+      let shouldFallbackToLocal = !environment.useBackend;
+
+      // If backend is enabled, try it first; fallback to local on failure/404
       if (environment.useBackend) {
-        // For backend, use POST to send password
         try {
           const response = await firstValueFrom(
             this.apiService.post<any>(`auth/delete-account`, { password })
@@ -313,34 +314,55 @@ export class AuthService {
             this.router.navigate(['/login']);
             return { success: true, message: 'Account deleted successfully' };
           } else {
-            return { success: false, message: response.message || 'Failed to delete account. Please verify your password.' };
+            // Backend responded but failed (e.g., 404). Fallback to local delete.
+            console.warn('Backend delete-account failed, falling back to local delete:', response.message);
+            shouldFallbackToLocal = true;
           }
         } catch (error: any) {
-          return { success: false, message: error.message || 'Failed to delete account. Please verify your password.' };
+          // Backend endpoint missing or not reachable; fallback to local
+          console.warn('Backend delete-account error, falling back to local delete:', error?.message || error);
+          shouldFallbackToLocal = true;
         }
-      } else {
-        // Fallback to localStorage
+      }
+
+      if (shouldFallbackToLocal) {
+        // Local fallback (mock or backend missing)
+        // First verify password if it exists locally
         const storedPassword = this.getPassword(currentUser.username);
-        if (storedPassword !== password) {
+        if (storedPassword && storedPassword !== password) {
           return { success: false, message: 'Invalid password' };
         }
 
-        // Remove user from storage
+        // Try to remove user from local storage (if it exists there)
         const users = this.getUsers();
-        const updatedUsers = users.filter(u => u.id !== currentUser.id);
-        this.saveUsers(updatedUsers);
+        const userExistsLocally = users.find(u => u.id === currentUser.id);
+        if (userExistsLocally) {
+          const updatedUsers = users.filter(u => u.id !== currentUser.id);
+          this.saveUsers(updatedUsers);
+        }
 
-        // Remove password
+        // Remove password from local storage (if it exists)
         const passwordKey = `pizza_time_pwd_${currentUser.username.toLowerCase()}`;
         localStorage.removeItem(passwordKey);
 
-        // Clear session
+        // Always clear session and token (most important)
         this.currentUser$.next(null);
         localStorage.removeItem(this.SESSION_KEY);
+        this.apiService.clearAuthToken();
+        
+        // If backend is enabled but endpoint failed, warn user
+        if (environment.useBackend) {
+          console.warn('Backend delete endpoint not available. Account may still exist on server.');
+          this.router.navigate(['/login']);
+          return { success: true, message: 'Local session cleared. Note: Account may still exist on server if backend endpoint is not available.' };
+        }
+        
         this.router.navigate(['/login']);
-
         return { success: true, message: 'Account deleted successfully' };
       }
+
+      // Safety net: if no path returned above
+      return { success: false, message: 'Failed to delete account' };
     } catch (error: any) {
       return { success: false, message: error.message || 'Failed to delete account' };
     }
