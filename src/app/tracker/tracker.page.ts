@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
+import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
 
 @Component({
   selector: 'app-tracker',
@@ -29,7 +30,8 @@ import { CartButtonComponent } from '../components/cart-button/cart-button.compo
     IonButtons,
     CommonModule,
     ChatWidgetComponent,
-    CartButtonComponent
+    CartButtonComponent,
+    SettingsButtonComponent
   ],
   standalone: true
 })

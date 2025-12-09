@@ -34,6 +34,7 @@ import {
 } from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
+import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
 
 interface SpecialtyPizza {
   id: string;
@@ -78,6 +79,7 @@ interface SpecialtyPizza {
     CurrencyPipe,
     ChatWidgetComponent,
     CartButtonComponent,
+    SettingsButtonComponent,
   ],
 })
 export class OrderPage {

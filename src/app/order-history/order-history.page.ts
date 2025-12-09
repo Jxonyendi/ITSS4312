@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, IonItem, IonLabel, IonThumbnail, IonChip, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, IonItem, IonLabel, IonThumbnail, IonChip, IonSegment, IonSegmentButton, IonButtons } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmergencyService, Order } from '../services/emergency.services';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
+import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
 
 @Component({
   selector: 'app-order-history',
@@ -24,9 +26,12 @@ import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.compo
     IonChip,
     IonSegment,
     IonSegmentButton,
+    IonButtons,
     CommonModule,
     FormsModule,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    CartButtonComponent,
+    SettingsButtonComponent
   ],
   standalone: true
 })

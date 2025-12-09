@@ -49,7 +49,6 @@ import {
   sendOutline,
 } from 'ionicons/icons';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
-import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
 
 interface SupportOption {
   id: string;
@@ -121,7 +120,6 @@ interface SupportRequest {
     FormsModule,
     ChatWidgetComponent,
     CartButtonComponent,
-    SettingsButtonComponent,
   ],
 })
 export class ContactUsPage {
@@ -354,7 +352,7 @@ export class ContactUsPage {
     }
 
     const message = this.supportMessage || `Support request: ${this.selectedOption.title} - This is a test from Pizza Time (mock).`;
-    await this.svc.sendMockSms(cs[0].phone, message);
+    //await this.svc.sendMockSms(cs[0].phone, message);
 
     // Add to support history
     const newRequest: SupportRequest = {

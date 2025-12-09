@@ -24,6 +24,8 @@ import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, closeCircleOutline, timeOutline, locationOutline, personOutline } from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
+import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
 
 @Component({
   selector: 'app-order-details',
@@ -48,6 +50,8 @@ import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.compo
     IonButtons,
     CommonModule,
     ChatWidgetComponent,
+    CartButtonComponent,
+    SettingsButtonComponent,
   ],
 })
 export class OrderDetailsPage implements OnInit, OnDestroy {
