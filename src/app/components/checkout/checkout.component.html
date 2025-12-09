@@ -18,6 +18,27 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- Special Instructions -->
+  <ion-card class="special-instructions-card">
+    <ion-card-header>
+      <ion-card-title>Special Instructions</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item class="form-item" lines="none">
+        <ion-label position="stacked">
+          Delivery Instructions <span class="optional">(optional)</span>
+        </ion-label>
+        <ion-textarea
+          formControlName="specialInstructions"
+          rows="3"
+          placeholder="Gate code, special instructions, leave at door..."
+          [maxlength]="200"
+          [counter]="true"
+        ></ion-textarea>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Payment Form -->
   <ion-card class="payment-card">
     <ion-card-header>

@@ -40,21 +40,16 @@
     <section class="pizza-info-section" *ngIf="order.pizzaName">
       <h2 class="section-title">Pizza Details</h2>
       <ion-card class="pizza-info-card">
-      <ion-card-header>
-        <ion-card-title>Pizza Details</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="pizza-image-section" *ngIf="order.pizzaImage">
-          <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" />
-        </div>
-        <ion-item lines="none">
-          <ion-label>
-            <h2>{{ order.pizzaName }}</h2>
+        <ion-card-content>
+          <div class="pizza-image-section" *ngIf="order.pizzaImage">
+            <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" />
+          </div>
+          <div class="pizza-details-content">
+            <h2 class="pizza-name">{{ order.pizzaName }}</h2>
             <p *ngIf="order.pizzaPrice" class="price">{{ order.pizzaPrice | currency: 'USD' }}</p>
-          </ion-label>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+          </div>
+        </ion-card-content>
+      </ion-card>
     </section>
 
     <!-- Order Information -->
@@ -73,11 +68,11 @@
           </ion-label>
         </ion-item>
 
-        <ion-item *ngIf="order.etaMinutes" lines="none">
-          <ion-icon name="time-outline" slot="start" color="warning"></ion-icon>
+        <ion-item lines="none">
+          <ion-icon name="time-outline" slot="start" [color]="getDeliveryStatusColor()"></ion-icon>
           <ion-label>
             <h3>Estimated Delivery</h3>
-            <p>{{ order.etaMinutes }} minutes</p>
+            <p>{{ getDeliveryStatusText() }}</p>
           </ion-label>
         </ion-item>
 

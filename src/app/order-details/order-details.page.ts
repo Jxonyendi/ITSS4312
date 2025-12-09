@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmergencyService, Order } from '../services/emergency.services';
 import { ToastController, AlertController } from '@ionic/angular';
@@ -54,13 +54,15 @@ export class OrderDetailsPage implements OnInit, OnDestroy {
   order: Order | null = null;
   orderId: string = '';
   private ordersSubscription?: Subscription;
+  private etaUpdateInterval?: any;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private emergencyService: EmergencyService,
     private toast: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private cdr: ChangeDetectorRef
   ) {
     addIcons({
       checkmarkCircleOutline,
@@ -80,13 +82,22 @@ export class OrderDetailsPage implements OnInit, OnDestroy {
       const updatedOrder = orders.find((o) => o.id === this.orderId);
       if (updatedOrder) {
         this.order = updatedOrder;
+        this.cdr.detectChanges();
       }
     });
+
+    // Update ETA every second for real-time countdown
+    this.etaUpdateInterval = setInterval(() => {
+      this.cdr.detectChanges();
+    }, 1000);
   }
 
   ngOnDestroy() {
     if (this.ordersSubscription) {
       this.ordersSubscription.unsubscribe();
+    }
+    if (this.etaUpdateInterval) {
+      clearInterval(this.etaUpdateInterval);
     }
   }
 
@@ -147,7 +158,7 @@ export class OrderDetailsPage implements OnInit, OnDestroy {
           text: 'Yes',
           role: 'destructive',
           handler: async () => {
-            await this.emergencyService.setOrderStatus('cancelled');
+            await this.emergencyService.setOrderStatusById(this.order!.id, 'cancelled');
             this.showToast('Order cancelled');
           },
         },
@@ -160,6 +171,58 @@ export class OrderDetailsPage implements OnInit, OnDestroy {
   formatDate(timestamp: number): string {
     const date = new Date(timestamp);
     return date.toLocaleString();
+  }
+
+  /**
+   * Get delivery status text based on order status
+   */
+  getDeliveryStatusText(): string {
+    if (!this.order) return '';
+    
+    if (this.order.status === 'cancelled') {
+      return 'Cancelled';
+    }
+    
+    if (this.order.status === 'delivered') {
+      return 'Delivered';
+    }
+    
+    // For in-progress orders, show remaining ETA
+    if (this.order.etaMinutes && this.order.placedAt) {
+      const now = Date.now();
+      const elapsedMinutes = Math.floor((now - this.order.placedAt) / 60000);
+      const remaining = this.order.etaMinutes - elapsedMinutes;
+      
+      if (remaining > 0) {
+        return `${remaining} min`;
+      } else {
+        return 'Arriving soon';
+      }
+    }
+    
+    // Fallback to original ETA if available
+    if (this.order.etaMinutes) {
+      return `${this.order.etaMinutes} minutes`;
+    }
+    
+    return 'N/A';
+  }
+
+  /**
+   * Get delivery status icon color based on order status
+   */
+  getDeliveryStatusColor(): string {
+    if (!this.order) return 'medium';
+    
+    if (this.order.status === 'cancelled') {
+      return 'danger';
+    }
+    
+    if (this.order.status === 'delivered') {
+      return 'success';
+    }
+    
+    return 'warning';
   }
 
   goBack() {

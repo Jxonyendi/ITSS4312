@@ -36,7 +36,7 @@
     <ion-grid>
       <ion-row>
         <ion-col size="12" size-md="6" size-lg="4" *ngFor="let pizza of specialtyPizzas">
-          <ion-card class="pizza-card" [class.selected]="selectedPizza?.id === pizza.id" (click)="selectPizza(pizza)">
+          <ion-card class="pizza-card">
             <div class="pizza-image-wrapper">
               <img [src]="pizza.image" [alt]="pizza.name" class="pizza-image" />
               <div *ngIf="pizza.tag" 
@@ -65,65 +65,6 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-  </section>
-
-  <!-- Order Details Panel (when pizza is selected) -->
-  <section class="order-panel" *ngIf="selectedPizza">
-    <ion-card class="order-card">
-      <ion-card-header>
-        <div class="panel-eyebrow">Your Selection</div>
-        <ion-card-title>{{ selectedPizza.name }}</ion-card-title>
-        <ion-card-subtitle>{{ selectedPizza.description }}</ion-card-subtitle>
-      </ion-card-header>
-
-      <ion-card-content>
-        <div class="order-details">
-          <div class="detail-item">
-            <span class="detail-label">Crust</span>
-            <span class="detail-value">{{ selectedPizza.crust }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Calories</span>
-            <span class="detail-value">{{ selectedPizza.calories }} cal/slice</span>
-          </div>
-          <div class="detail-item price-item">
-            <span class="detail-label">Price</span>
-            <span class="detail-price">{{ selectedPizza.price | currency: 'USD' }}</span>
-          </div>
-        </div>
-
-        <div class="delivery-section">
-          <ion-item lines="none" class="delivery-item">
-            <ion-label position="stacked">
-              <span class="field-label">Delivery Instructions</span>
-              <span class="field-optional">(optional)</span>
-            </ion-label>
-            <ion-textarea
-              rows="3"
-              placeholder="Gate code, special instructions, leave at door..."
-              [(ngModel)]="note"
-              [maxlength]="maxNoteLength"
-              [counter]="true"
-            ></ion-textarea>
-            <ion-note slot="helper" *ngIf="note && note.length > maxNoteLength" color="danger">
-              Note is too long ({{ note.length }}/{{ maxNoteLength }})
-            </ion-note>
-          </ion-item>
-        </div>
-
-        <ion-button expand="block" size="large" class="place-order-btn" (click)="placeOrder()">
-          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-          Add to Cart - {{ selectedPizza.price | currency: 'USD' }}
-        </ion-button>
-
-        <div class="recent-order" *ngIf="lastOrder">
-          <div class="recent-label">Recent Order</div>
-          <div class="recent-detail">
-            Order #{{ lastOrder.id }} • {{ lastOrder.status }} • {{ lastOrder.fakeCourierName }}
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
   </section>
 
   <!-- Chat Widget -->

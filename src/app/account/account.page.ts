@@ -168,6 +168,50 @@ export class AccountPage implements OnInit {
     this.showToast('Logged out successfully');
   }
 
+  async deleteAccount() {
+    const alert = await this.alertController.create({
+      header: 'Delete Account',
+      message: 'Are you sure you want to delete your account? This action cannot be undone. Please type your password to confirm.',
+      inputs: [
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: 'Enter your password',
+          attributes: {
+            required: true
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete Account',
+          role: 'destructive',
+          handler: async (data) => {
+            if (!data.password || data.password.trim() === '') {
+              this.showToast('Password is required');
+              return false; // Prevent alert from closing
+            }
+
+            const result = await this.authService.deleteAccount(data.password);
+            if (result.success) {
+              this.showToast(result.message);
+              return true; // Allow alert to close (user will be logged out anyway)
+            } else {
+              this.showToast(result.message);
+              return false; // Prevent alert from closing on error
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
   markFormGroupTouched(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);

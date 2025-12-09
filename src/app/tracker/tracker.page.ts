@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonItem, IonLabel, IonThumbnail, IonChip, IonButtons } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -36,11 +36,13 @@ import { CartButtonComponent } from '../components/cart-button/cart-button.compo
 export class TrackerPage implements OnInit, OnDestroy {
   orders: Order[] = [];
   private ordersSubscription?: Subscription;
+  private etaUpdateInterval?: any;
 
   constructor(
     private emergencyService: EmergencyService,
     private alertController: AlertController,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -53,20 +55,40 @@ export class TrackerPage implements OnInit, OnDestroy {
         }
       );
     }
+    
+    // Update ETA every second for real-time countdown and check for delivered orders
+    this.etaUpdateInterval = setInterval(() => {
+      // Check for orders that should be marked as delivered (ETA reached 0)
+      this.checkAndMarkDelivered();
+      // Force change detection to update ETA display
+      this.cdr.detectChanges();
+    }, 1000); // Update every second
   }
 
   ngOnDestroy() {
     if (this.ordersSubscription) {
       this.ordersSubscription.unsubscribe();
     }
+    if (this.etaUpdateInterval) {
+      clearInterval(this.etaUpdateInterval);
+    }
   }
 
   /**
-   * Get the active order (not cancelled or delivered)
+   * Get all active orders (not cancelled or delivered)
    */
-  getActiveOrder(): Order | undefined {
-    return this.orders.find(
+  getActiveOrders(): Order[] {
+    return this.orders.filter(
       order => order.status !== 'cancelled' && order.status !== 'delivered'
+    );
+  }
+
+  /**
+   * Get completed orders (cancelled or delivered)
+   */
+  getCompletedOrders(): Order[] {
+    return this.orders.filter(
+      order => order.status === 'cancelled' || order.status === 'delivered'
     );
   }
 
@@ -106,7 +128,7 @@ export class TrackerPage implements OnInit, OnDestroy {
         {
           text: 'Yes',
           handler: async () => {
-            await this.emergencyService.setOrderStatus('cancelled');
+            await this.emergencyService.setOrderStatusById(order.id, 'cancelled');
           }
         }
       ]
@@ -128,6 +150,56 @@ export class TrackerPage implements OnInit, OnDestroy {
    */
   viewOrderDetails(orderId: string) {
     this.router.navigate(['/order-details', orderId]);
+  }
+
+  /**
+   * Calculate remaining ETA in minutes based on order placed time and initial ETA
+   */
+  getRemainingETA(order: Order): number | null {
+    // Don't show ETA for cancelled or delivered orders
+    if (order.status === 'cancelled' || order.status === 'delivered') {
+      return null;
+    }
+    
+    if (!order.etaMinutes || !order.placedAt) {
+      return null;
+    }
+    
+    const now = Date.now();
+    const elapsedMinutes = Math.floor((now - order.placedAt) / 60000);
+    const remaining = order.etaMinutes - elapsedMinutes;
+    
+    return remaining > 0 ? remaining : 0;
+  }
+
+  /**
+   * Get ETA display text
+   */
+  getETAText(order: Order): string {
+    const remaining = this.getRemainingETA(order);
+    if (remaining === null) {
+      return '';
+    }
+    if (remaining === 0) {
+      return 'Arriving soon';
+    }
+    return `${remaining} min`;
+  }
+
+  /**
+   * Check for orders with ETA = 0 and automatically mark them as delivered
+   */
+  private async checkAndMarkDelivered(): Promise<void> {
+    const activeOrders = this.getActiveOrders();
+    
+    for (const order of activeOrders) {
+      const remaining = this.getRemainingETA(order);
+      
+      // If ETA has reached 0 or below, mark as delivered
+      if (remaining !== null && remaining <= 0 && order.status !== 'delivered' && order.status !== 'cancelled') {
+        await this.emergencyService.setOrderStatusById(order.id, 'delivered');
+      }
+    }
   }
 }
 

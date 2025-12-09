@@ -254,30 +254,42 @@ export class EmergencyService {
         o => o.status !== 'cancelled' && o.status !== 'delivered'
       );
       if (activeOrder) {
-        if (environment.useBackend) {
-          try {
-            const response = await firstValueFrom(
-              this.apiService.put<Order>(`orders/${activeOrder.id}`, { status })
+        await this.setOrderStatusById(activeOrder.id, status);
+      }
+    }
+  }
+
+  async setOrderStatusById(orderId: string, status: 'placed'|'accepted'|'on_the_way'|'delivered'|'cancelled'): Promise<void> {
+    const currentOrders = this.orders$.value;
+    const orderToUpdate = currentOrders.find(o => o.id === orderId);
+    if (orderToUpdate) {
+      if (environment.useBackend) {
+        try {
+          const response = await firstValueFrom(
+            this.apiService.put<Order>(`orders/${orderId}`, { status })
+          );
+          if (response.success && response.data) {
+            // Update local state
+            const updated = currentOrders.map(o => 
+              o.id === orderId ? { ...o, status } : o
             );
-            if (response.success && response.data) {
-              // Update local state
-              const updated = currentOrders.map(o => 
-                o.id === activeOrder.id ? { ...o, status } : o
-              );
-              this.orders$.next(updated);
-            }
-          } catch (error) {
-            console.error('Failed to update order status:', error);
-            // Fallback to local update
-            activeOrder.status = status;
-            this.orders$.next([...currentOrders]);
-            this.saveOrdersToStorage();
+            this.orders$.next(updated);
           }
-        } else {
-          activeOrder.status = status;
-          this.orders$.next([...currentOrders]);
+        } catch (error) {
+          console.error('Failed to update order status:', error);
+          // Fallback to local update
+          const updated = currentOrders.map(o => 
+            o.id === orderId ? { ...o, status } : o
+          );
+          this.orders$.next(updated);
           this.saveOrdersToStorage();
         }
+      } else {
+        const updated = currentOrders.map(o => 
+          o.id === orderId ? { ...o, status } : o
+        );
+        this.orders$.next(updated);
+        this.saveOrdersToStorage();
       }
     }
   }

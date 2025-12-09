@@ -282,6 +282,71 @@ export class AuthService {
   }
 
   /**
+   * Delete account
+   */
+  async deleteAccount(password: string): Promise<{ success: boolean; message: string }> {
+    const currentUser = this.currentUser$.value;
+    if (!currentUser) {
+      return { success: false, message: 'No user logged in' };
+    }
+
+    try {
+      // Verify password first
+      const credentials: UserCredentials = {
+        username: currentUser.username,
+        password: password
+      };
+
+      // Verify password is correct
+      if (environment.useBackend) {
+        // For backend, use POST to send password
+        try {
+          const response = await firstValueFrom(
+            this.apiService.post<any>(`auth/delete-account`, { password })
+          );
+          
+          if (response.success) {
+            // Clear session
+            this.currentUser$.next(null);
+            localStorage.removeItem(this.SESSION_KEY);
+            this.apiService.clearAuthToken();
+            this.router.navigate(['/login']);
+            return { success: true, message: 'Account deleted successfully' };
+          } else {
+            return { success: false, message: response.message || 'Failed to delete account. Please verify your password.' };
+          }
+        } catch (error: any) {
+          return { success: false, message: error.message || 'Failed to delete account. Please verify your password.' };
+        }
+      } else {
+        // Fallback to localStorage
+        const storedPassword = this.getPassword(currentUser.username);
+        if (storedPassword !== password) {
+          return { success: false, message: 'Invalid password' };
+        }
+
+        // Remove user from storage
+        const users = this.getUsers();
+        const updatedUsers = users.filter(u => u.id !== currentUser.id);
+        this.saveUsers(updatedUsers);
+
+        // Remove password
+        const passwordKey = `pizza_time_pwd_${currentUser.username.toLowerCase()}`;
+        localStorage.removeItem(passwordKey);
+
+        // Clear session
+        this.currentUser$.next(null);
+        localStorage.removeItem(this.SESSION_KEY);
+        this.router.navigate(['/login']);
+
+        return { success: true, message: 'Account deleted successfully' };
+      }
+    } catch (error: any) {
+      return { success: false, message: error.message || 'Failed to delete account' };
+    }
+  }
+
+  /**
    * Generate unique ID
    */
   private generateId(): string {

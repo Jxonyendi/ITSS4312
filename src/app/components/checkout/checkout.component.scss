@@ -71,6 +71,62 @@
   }
 }
 
+.special-instructions-card {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding: 20px 20px 12px;
+
+    ion-card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1d1d1d;
+    }
+  }
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  .form-item {
+    --background: #f8f9fa;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 0;
+    --inner-padding-start: 0;
+    --min-height: auto;
+    margin-bottom: 0;
+    border-radius: 12px;
+    border: 2px solid #e8e8e8;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #d0d0d0;
+    }
+
+    ion-label {
+      font-weight: 600;
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+
+      .optional {
+        color: #999;
+        font-weight: 400;
+      }
+    }
+
+    ion-textarea {
+      font-weight: 500;
+      color: #1d1d1d;
+      font-size: 1rem;
+    }
+  }
+}
+
 .payment-card {
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);

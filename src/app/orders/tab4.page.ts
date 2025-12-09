@@ -141,12 +141,6 @@ export class OrderPage {
       image: 'assets/images/pizza/deluxe.jpg',
     },
   ];
-  selectedPizza: SpecialtyPizza = this.specialtyPizzas[0];
-  alias = this.selectedPizza.name;
-  note = '';
-  maxNoteLength = 200;
-  lastOrder: any = null;
-
   constructor(
     private svc: EmergencyService,
     private cartService: CartService,
@@ -157,24 +151,6 @@ export class OrderPage {
       'checkmark-circle-outline': checkmarkCircleOutline,
       'construct-outline': constructOutline,
     });
-    
-    const os = this.svc.getOrders();
-    this.lastOrder = os.length ? os[0] : null;
-    this.svc.orders$.subscribe(o => {
-      this.lastOrder = o.length ? o[0] : null;
-    });
-  }
-
-  selectPizza(pizza: SpecialtyPizza) {
-    this.selectedPizza = pizza;
-    this.alias = pizza.name;
-    // Scroll to order panel
-    setTimeout(() => {
-      const panel = document.querySelector('.order-panel');
-      if (panel) {
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
   }
 
   /**
@@ -195,29 +171,6 @@ export class OrderPage {
     this.showToast(`${pizza.name} added to cart`);
   }
 
-  async placeOrder() {
-    if (!this.selectedPizza) {
-      this.showToast('Pick a specialty pizza to continue.');
-      return;
-    }
-    
-    // Validate note length
-    if (this.note && this.note.length > this.maxNoteLength) {
-      this.showToast(`Delivery note must be ${this.maxNoteLength} characters or less.`);
-      return;
-    }
-    
-    // Add pizza to cart
-    this.cartService.addToCart({
-      pizzaId: this.selectedPizza.id,
-      pizzaName: this.selectedPizza.name,
-      pizzaImage: this.selectedPizza.image,
-      pizzaPrice: this.selectedPizza.price,
-      note: (this.note || '').trim()
-    });
-    this.showToast(`${this.selectedPizza.name} added to cart`);
-    this.note = '';
-  }
 
   async showToast(msg:string) {
     const t = await this.toast.create({message: msg, duration: 2000});

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
+import { CartService } from '../services/cart.service';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons } from '@ionic/angular/standalone';
@@ -93,6 +94,7 @@ export class HomePage {
 
   constructor(
     private svc: EmergencyService,
+    private cartService: CartService,
     private toast: ToastController,
     private loadingCtrl: LoadingController,
     private router: Router
@@ -106,6 +108,20 @@ export class HomePage {
   viewPizza(pizza: FeaturedPizza) {
     // Navigate to order page with this pizza selected
     this.router.navigate(['/tabs/order']);
+  }
+
+  addFeaturedPizzaToCart(pizza: FeaturedPizza, event?: Event) {
+    if (event) {
+      event.stopPropagation(); // Prevent card click from firing
+    }
+    this.cartService.addToCart({
+      pizzaId: pizza.id,
+      pizzaName: pizza.name,
+      pizzaImage: pizza.image,
+      pizzaPrice: pizza.price,
+      note: ''
+    });
+    this.showToast(`${pizza.name} added to cart`);
   }
 
   async sendHelp() {
@@ -152,32 +168,14 @@ export class HomePage {
     }
   }
 
-  async orderDeal(deal: Deal) {
-    const loading = await this.loadingCtrl.create({
-      message: 'Placing order...',
+  addDealToCart(deal: Deal) {
+    this.cartService.addToCart({
+      pizzaId: deal.id,
+      pizzaName: deal.name,
+      pizzaPrice: deal.price,
+      note: deal.description,
     });
-    await loading.present();
-
-    try {
-      // Create order with deal information
-      const payload = {
-        pizzaId: deal.id,
-        pizzaName: deal.name,
-        pizzaPrice: deal.price,
-        note: deal.description,
-      };
-
-      await this.svc.placePizzaOrder(payload);
-      await loading.dismiss();
-      
-      this.showToast(`${deal.name} order placed! View in Tracker.`);
-      
-      // Navigate to tracker to show the order
-      this.router.navigate(['/tabs/tracker']);
-    } catch (error) {
-      await loading.dismiss();
-      this.showToast('Failed to place order. Please try again.');
-    }
+    this.showToast(`${deal.name} added to cart`);
   }
 
   async showToast(msg:string) {

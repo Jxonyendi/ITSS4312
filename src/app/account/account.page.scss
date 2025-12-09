@@ -101,6 +101,22 @@
 
 .logout-section {
   margin-bottom: 32px;
+
+  ion-grid {
+    padding: 0;
+  }
+
+  ion-col {
+    padding: 0 6px;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
 }
 
 .form-actions {

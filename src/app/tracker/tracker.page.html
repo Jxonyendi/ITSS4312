@@ -21,30 +21,45 @@
   </section>
 
   <div class="tracker-container">
-    <!-- Active Order Section -->
-    <section class="active-order-section" *ngIf="getActiveOrder() as activeOrder">
-      <h2 class="section-title">Current Order</h2>
-      <ion-card class="active-order-card">
+    <!-- Active Orders Section -->
+    <section class="active-order-section" *ngIf="getActiveOrders().length > 0">
+      <h2 class="section-title">Current Orders</h2>
+      <ion-card *ngFor="let order of getActiveOrders()" class="active-order-card">
         <ion-card-header>
-          <ion-card-title>Order #{{ activeOrder.id }}</ion-card-title>
+          <ion-card-title>Order #{{ order.id }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           <ion-item lines="none">
+            <ion-thumbnail slot="start" *ngIf="order.pizzaImage">
+              <img [src]="order.pizzaImage" [alt]="order.pizzaName" loading="lazy" decoding="async" />
+            </ion-thumbnail>
             <ion-label>
-              <h2>Order ID: {{ activeOrder.id }}</h2>
-              <p>Status: <strong>{{ getStatusText(activeOrder.status) }}</strong></p>
-              <p *ngIf="activeOrder.etaMinutes">ETA: <strong>{{ activeOrder.etaMinutes }} min</strong></p>
-              <p *ngIf="activeOrder.fakeCourierName">Courier: <strong>{{ activeOrder.fakeCourierName }}</strong></p>
+              <h2>Order ID: {{ order.id }}</h2>
+              <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong> — {{ order.pizzaPrice | currency:'USD' }}</p>
+              <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
+              <p *ngIf="getRemainingETA(order) !== null">ETA: <strong>{{ getETAText(order) }}</strong></p>
+              <p *ngIf="order.fakeCourierName">Courier: <strong>{{ order.fakeCourierName }}</strong></p>
+              <p *ngIf="order.note">Note: {{ order.note }}</p>
             </ion-label>
           </ion-item>
-          <ion-button 
-            *ngIf="canCancel(activeOrder)"
-            expand="block" 
-            color="danger" 
-            (click)="cancelOrder(activeOrder)"
-            class="cancel-button">
-            Cancel Order
-          </ion-button>
+          <div class="order-actions">
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              color="primary" 
+              (click)="viewOrderDetails(order.id)"
+              class="view-button">
+              View Order
+            </ion-button>
+            <ion-button 
+              *ngIf="canCancel(order)"
+              expand="block" 
+              color="danger" 
+              (click)="cancelOrder(order)"
+              class="cancel-button">
+              Cancel Order
+            </ion-button>
+          </div>
         </ion-card-content>
       </ion-card>
     </section>
@@ -52,10 +67,13 @@
     <!-- Order History Section -->
     <section class="order-history-section">
       <h2 class="section-title">Order History</h2>
-      <div *ngIf="orders.length === 0" class="no-orders">
+      <div *ngIf="getCompletedOrders().length === 0 && getActiveOrders().length === 0" class="no-orders">
         <p>No orders yet. Place an order to see it here.</p>
       </div>
-      <ion-card *ngFor="let order of orders" class="order-card" (click)="viewOrderDetails(order.id)">
+      <div *ngIf="getCompletedOrders().length === 0 && getActiveOrders().length > 0" class="no-orders">
+        <p>No completed orders yet.</p>
+      </div>
+      <ion-card *ngFor="let order of getCompletedOrders()" class="order-card" (click)="viewOrderDetails(order.id)">
         <ion-card-content>
           <ion-item lines="none" button>
             <ion-thumbnail slot="start" *ngIf="order.pizzaImage">
@@ -65,7 +83,7 @@
               <h2>Order ID: {{ order.id }}</h2>
               <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong> — {{ order.pizzaPrice | currency:'USD' }}</p>
               <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
-              <p *ngIf="order.etaMinutes">ETA: {{ order.etaMinutes }} min</p>
+              <p *ngIf="getRemainingETA(order) !== null">ETA: {{ getETAText(order) }}</p>
               <p *ngIf="order.fakeCourierName">Courier: {{ order.fakeCourierName }}</p>
               <p *ngIf="order.note">Note: {{ order.note }}</p>
               <p class="order-time">Placed: {{ formatDate(order.placedAt) }}</p>

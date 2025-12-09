@@ -80,8 +80,23 @@
   }
 }
 
-.cancel-button {
+.order-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
   margin-top: 16px;
+}
+
+.view-button {
+  --border-color: #e31837;
+  --color: #e31837;
+  font-weight: 600;
+  flex: 1;
+}
+
+.cancel-button {
+  margin-top: 0;
+  flex: 1;
 }
 
 .order-time {

@@ -1,31 +1,27 @@
 .cart-button {
-  position: relative;
   --padding-start: 8px;
-  --padding-end: 12px;
+  --padding-end: 8px;
   margin: 0;
-  font-weight: 600;
-  --color: #e31837;
-  color: #e31837;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   
   ion-icon {
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     color: #e31837;
-    margin-right: 4px;
   }
 }
 
 .cart-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+  padding: 0 6px;
+  margin-left: -4px;
 }
 

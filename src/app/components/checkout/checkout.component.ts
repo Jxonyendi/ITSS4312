@@ -11,6 +11,7 @@ import {
   IonButton,
   IonIcon,
   IonNote,
+  IonTextarea,
 } from '@ionic/angular/standalone';
 import {
   ReactiveFormsModule,
@@ -43,6 +44,7 @@ import { arrowBackOutline, cardOutline } from 'ionicons/icons';
     IonButton,
     IonIcon,
     IonNote,
+    IonTextarea,
     ReactiveFormsModule,
   ],
   templateUrl: './checkout.component.html',
@@ -70,6 +72,7 @@ export class CheckoutComponent {
     });
 
     this.paymentForm = this.fb.group({
+      specialInstructions: [''],
       cardNumber: [
         '',
         [
@@ -179,15 +182,23 @@ export class CheckoutComponent {
     this.isProcessing = true;
 
     try {
+      // Get special instructions from form
+      const specialInstructions = this.paymentForm.get('specialInstructions')?.value || '';
+      
       // Convert cart items to orders
       for (const item of this.cartItems) {
         for (let i = 0; i < item.quantity; i++) {
+          // Combine item note with special instructions
+          const combinedNote = [item.note, specialInstructions]
+            .filter(n => n && n.trim())
+            .join(' | ');
+            
           await this.emergencyService.placePizzaOrder({
             pizzaId: item.pizzaId,
             pizzaName: item.pizzaName,
             pizzaImage: item.pizzaImage,
             pizzaPrice: item.pizzaPrice,
-            note: item.note,
+            note: combinedNote || undefined,
           });
         }
       }

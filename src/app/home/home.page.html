@@ -70,8 +70,8 @@
           <p class="pizza-description">{{ pizza.description }}</p>
           <div class="pizza-price-row">
             <span class="price">{{ pizza.price | currency: 'USD' }}</span>
-            <ion-button size="small" fill="clear" color="primary">
-              Order Now
+            <ion-button size="small" fill="clear" color="primary" (click)="addFeaturedPizzaToCart(pizza, $event)">
+              Add to Cart
             </ion-button>
           </div>
         </ion-card-content>
@@ -93,7 +93,7 @@
             </ion-card-header>
             <ion-card-content>
               <p class="deal-price">{{ deal.price | currency: 'USD' }} <span class="deal-old-price">{{ deal.originalPrice | currency: 'USD' }}</span></p>
-              <ion-button expand="block" color="primary" (click)="orderDeal(deal)">Order Deal</ion-button>
+              <ion-button expand="block" color="primary" (click)="addDealToCart(deal)">Add to Cart</ion-button>
             </ion-card-content>
           </ion-card>
         </ion-col>
