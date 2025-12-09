@@ -211,21 +211,12 @@
   }
 }
 
-<<<<<<< HEAD
 ion-input {
-  --color: #ffffff;
-  --placeholder-color: rgba(255, 255, 255, 0.7); //invisible labels/txt fix
-  caret-color: #ffffff;
+  --color: #000000;
+  --placeholder-color: #666;
+  caret-color: #000000;
 }
 
 ion-label {
-  color: #ffffff; //invisible labels/txt fix
+  color: #000000;
 }
-
-ion-card ion-input {
-  --color: #000000;
-  --placeholder-color: #666; //dark text for inputs in card
-  caret-color: #000000;
-}
-=======
->>>>>>> 3a4491c94732c62edb53cc3456644a62c6092b3f
