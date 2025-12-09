@@ -56,23 +56,27 @@ export class AuthService {
       if (environment.useBackend) {
         // Use REST API
         const response = await firstValueFrom(
-          this.apiService.post<{ token: string; user: any }>('auth/register', {
+          this.apiService.post<any>('auth/register', {
             username: credentials.username,
             email: credentials.email,
             password: credentials.password
           })
         );
 
-        if (response.success && response.token && response.user) {
+        // Backend returns { success, token, user, message } at top level
+        const token = response.token || (response.data as any)?.token;
+        const userData = response.user || (response.data as any)?.user;
+
+        if (response.success && token && userData) {
           // Store token
-          this.apiService.setAuthToken(response.token);
+          this.apiService.setAuthToken(token);
           
           // Convert API user to app User format
           const user: User = {
-            id: response.user.id || response.user._id,
-            username: response.user.username,
-            email: response.user.email,
-            createdAt: response.user.createdAt ? new Date(response.user.createdAt).getTime() : Date.now()
+            id: userData.id || userData._id,
+            username: userData.username,
+            email: userData.email,
+            createdAt: userData.createdAt ? new Date(userData.createdAt).getTime() : Date.now()
           };
 
           // Set current user
@@ -123,22 +127,26 @@ export class AuthService {
       if (environment.useBackend) {
         // Use REST API
         const response = await firstValueFrom(
-          this.apiService.post<{ token: string; user: any }>('auth/login', {
+          this.apiService.post<any>('auth/login', {
             username: credentials.username,
             password: credentials.password
           })
         );
 
-        if (response.success && response.token && response.user) {
+        // Backend returns { success, token, user, message } at top level
+        const token = response.token || (response.data as any)?.token;
+        const userData = response.user || (response.data as any)?.user;
+
+        if (response.success && token && userData) {
           // Store token
-          this.apiService.setAuthToken(response.token);
+          this.apiService.setAuthToken(token);
           
           // Convert API user to app User format
           const user: User = {
-            id: response.user.id || response.user._id,
-            username: response.user.username,
-            email: response.user.email,
-            createdAt: response.user.createdAt ? new Date(response.user.createdAt).getTime() : Date.now()
+            id: userData.id || userData._id,
+            username: userData.username,
+            email: userData.email,
+            createdAt: userData.createdAt ? new Date(userData.createdAt).getTime() : Date.now()
           };
 
           // Set current user

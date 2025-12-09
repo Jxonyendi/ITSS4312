@@ -1,0 +1,191 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Build Your Own Pizza</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="build-pizza-content">
+  <div class="modal-container">
+    <!-- Size Selection -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="resize-outline"></ion-icon>
+        Size
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let size of sizes"
+          [class.selected]="selectedSize === size.id"
+          (click)="selectedSize = size.id"
+          class="option-chip"
+        >
+          {{ size.name }}
+          <span class="price-badge" *ngIf="size.price">{{ size.price | currency: 'USD' }}</span>
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Crust Selection -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="restaurant-outline"></ion-icon>
+        Crust
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let crust of crusts"
+          [class.selected]="selectedCrust === crust.id"
+          (click)="selectedCrust = crust.id"
+          class="option-chip"
+        >
+          {{ crust.name }}
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Sauce Selection -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="water-outline"></ion-icon>
+        Sauce
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let sauce of sauces"
+          [class.selected]="selectedSauce === sauce.id"
+          (click)="selectedSauce = sauce.id"
+          class="option-chip"
+        >
+          {{ sauce.name }}
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Cheese Selection -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="layers-outline"></ion-icon>
+        Cheese
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let cheese of cheeses"
+          [class.selected]="selectedCheese === cheese.id"
+          (click)="selectedCheese = cheese.id"
+          class="option-chip"
+        >
+          {{ cheese.name }}
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Meat Toppings -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="nutrition-outline"></ion-icon>
+        Meat Toppings
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let topping of meatToppings"
+          [class.selected]="isToppingSelected(topping.id)"
+          (click)="toggleTopping(topping.id)"
+          class="option-chip topping-chip"
+        >
+          {{ topping.name }}
+          <span class="price-badge" *ngIf="topping.price">+{{ topping.price | currency: 'USD' }}</span>
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Vegetable Toppings -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="leaf-outline"></ion-icon>
+        Vegetable Toppings
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let topping of veggieToppings"
+          [class.selected]="isToppingSelected(topping.id)"
+          (click)="toggleTopping(topping.id)"
+          class="option-chip topping-chip"
+        >
+          {{ topping.name }}
+          <span class="price-badge" *ngIf="topping.price">+{{ topping.price | currency: 'USD' }}</span>
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Premium Toppings -->
+    <section class="customization-section">
+      <h3 class="section-header">
+        <ion-icon name="star-outline"></ion-icon>
+        Premium Toppings
+      </h3>
+      <div class="options-grid">
+        <ion-chip
+          *ngFor="let topping of premiumToppings"
+          [class.selected]="isToppingSelected(topping.id)"
+          (click)="toggleTopping(topping.id)"
+          class="option-chip topping-chip"
+        >
+          {{ topping.name }}
+          <span class="price-badge" *ngIf="topping.price">+{{ topping.price | currency: 'USD' }}</span>
+        </ion-chip>
+      </div>
+    </section>
+
+    <!-- Summary Card -->
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Your Custom Pizza</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-details">
+          <div class="summary-item">
+            <span class="summary-label">Size:</span>
+            <span class="summary-value">{{ sizes.find(s => s.id === selectedSize)?.name }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Crust:</span>
+            <span class="summary-value">{{ crusts.find(c => c.id === selectedCrust)?.name }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Sauce:</span>
+            <span class="summary-value">{{ sauces.find(s => s.id === selectedSauce)?.name }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Cheese:</span>
+            <span class="summary-value">{{ cheeses.find(c => c.id === selectedCheese)?.name }}</span>
+          </div>
+          <div class="summary-item" *ngIf="selectedToppings.length > 0">
+            <span class="summary-label">Toppings:</span>
+            <span class="summary-value">{{ getSelectedToppingsString() }}</span>
+          </div>
+        </div>
+        <div class="price-display">
+          <span class="price-label">Total Price:</span>
+          <span class="price-value">{{ getTotalPrice() | currency: 'USD' }}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <ion-button expand="block" size="large" class="add-to-order-btn" (click)="addToOrder()">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Add to Order - {{ getTotalPrice() | currency: 'USD' }}
+      </ion-button>
+      <ion-button expand="block" fill="outline" (click)="dismiss()">
+        Cancel
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+

@@ -55,12 +55,37 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-bottom: 20px;
 
     ion-chip {
       background: rgba(255, 255, 255, 0.2);
       color: #fff;
       font-weight: 600;
       margin: 0;
+    }
+  }
+
+  .build-pizza-btn {
+    --background: rgba(255, 255, 255, 0.95);
+    --background-activated: rgba(255, 255, 255, 0.85);
+    --background-focused: rgba(255, 255, 255, 0.85);
+    --color: #e31837;
+    --border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    height: 56px;
+    margin-top: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    ion-icon {
+      font-size: 1.4rem;
+      margin-right: 8px;
     }
   }
 }
@@ -498,6 +523,446 @@
       ion-card-content {
         padding: 24px;
       }
+    }
+  }
+}
+
+// Build Pizza Modal Styles
+.build-pizza-content {
+  --background: #f8f9fa;
+}
+
+.modal-container {
+  padding: 24px;
+  padding-bottom: 120px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pizza-base-group {
+  margin-bottom: 32px;
+}
+
+.toppings-group {
+  margin-bottom: 32px;
+
+  .group-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1d1d1d;
+    margin: 0 0 20px 0;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(135deg, #e31837, #c1121f);
+      border-radius: 2px;
+    }
+  }
+}
+
+.customization-section {
+  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1d1d1d;
+    margin: 0 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+    
+    ion-icon {
+      font-size: 1.6rem;
+      color: #e31837;
+      background: rgba(227, 24, 55, 0.1);
+      padding: 8px;
+      border-radius: 10px;
+    }
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    
+    @media (max-width: 640px) {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+  }
+
+  .option-chip {
+    --background: #ffffff;
+    --color: #1d1d1d;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+    min-height: 48px;
+    border: 2px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    &:hover {
+      --background: #f8f9fa;
+      border-color: #e31837;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(227, 24, 55, 0.15);
+
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &.selected {
+      --background: linear-gradient(135deg, #e31837, #c1121f);
+      --color: #fff;
+      border-color: #c1121f;
+      box-shadow: 0 6px 20px rgba(227, 24, 55, 0.35);
+      transform: translateY(-2px);
+      font-weight: 700;
+
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        opacity: 0.9;
+      }
+    }
+
+    .price-badge {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      opacity: 0.85;
+      font-weight: 600;
+      padding: 2px 6px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+    }
+
+    &.selected .price-badge {
+      background: rgba(255, 255, 255, 0.25);
+      opacity: 1;
+    }
+
+    &.topping-chip {
+      min-height: 44px;
+      font-size: 0.9rem;
+      
+      .price-badge {
+        font-size: 0.75rem;
+        margin-left: 6px;
+      }
+    }
+  }
+}
+
+.summary-card {
+  margin: 32px 0 28px;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  background: #fff;
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  position: sticky;
+  bottom: 24px;
+  z-index: 10;
+
+  ion-card-header {
+    padding: 28px 28px 20px;
+    background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+    border-bottom: 2px solid #f0f0f0;
+
+    ion-card-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1d1d1d;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      &::before {
+        content: '🍕';
+        font-size: 1.8rem;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 28px;
+
+    .summary-details {
+      margin-bottom: 24px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 20px;
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid #e8e8e8;
+
+        &:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        &:first-child {
+          padding-top: 0;
+        }
+
+        .summary-label {
+          font-weight: 600;
+          color: #666;
+          font-size: 0.95rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-size: 0.85rem;
+        }
+
+        .summary-value {
+          color: #1d1d1d;
+          font-size: 1rem;
+          text-align: right;
+          flex: 1;
+          word-break: break-word;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .price-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #e31837, #c1121f);
+      border-radius: 16px;
+      margin-top: 0;
+      box-shadow: 0 4px 16px rgba(227, 24, 55, 0.3);
+
+      .price-label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.95;
+      }
+
+      .price-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 0;
+  padding-top: 24px;
+  border-top: 2px solid #f0f0f0;
+
+  .add-to-order-btn {
+    --background: linear-gradient(135deg, #e31837, #c1121f);
+    --background-activated: #c1121f;
+    --background-focused: #c1121f;
+    --color: #fff;
+    --border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    height: 60px;
+    box-shadow: 0 8px 24px rgba(227, 24, 55, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.3px;
+    text-transform: none;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(227, 24, 55, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 16px rgba(227, 24, 55, 0.3);
+    }
+
+    ion-icon {
+      font-size: 1.5rem;
+      margin-right: 10px;
+    }
+  }
+
+  ion-button[fill="outline"] {
+    --border-color: #d0d0d0;
+    --border-width: 2px;
+    --color: #666;
+    --border-radius: 16px;
+    font-weight: 600;
+    height: 52px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      --border-color: #e31837;
+      --color: #e31837;
+      background: rgba(227, 24, 55, 0.05);
+    }
+  }
+}
+
+// Responsive design for modal
+@media (max-width: 768px) {
+  .modal-container {
+    padding: 16px;
+    padding-bottom: 120px;
+  }
+
+  .customization-section {
+    padding: 20px;
+    margin-bottom: 20px;
+
+    .section-header {
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      
+      ion-icon {
+        font-size: 1.4rem;
+        padding: 6px;
+      }
+    }
+
+    .options-grid {
+      gap: 10px;
+    }
+
+    .option-chip {
+      min-height: 44px;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+    }
+  }
+
+  .summary-card {
+    margin: 24px 0 20px;
+    border-radius: 20px;
+
+    ion-card-header {
+      padding: 24px 24px 16px;
+
+      ion-card-title {
+        font-size: 1.4rem;
+      }
+    }
+
+    ion-card-content {
+      padding: 24px;
+
+      .summary-details {
+        padding: 16px;
+      }
+
+      .price-display {
+        padding: 20px 24px;
+
+        .price-label {
+          font-size: 1.1rem;
+        }
+
+        .price-value {
+          font-size: 1.75rem;
+        }
+      }
+    }
+  }
+
+  .action-buttons {
+    gap: 12px;
+
+    .add-to-order-btn {
+      height: 56px;
+      font-size: 1.1rem;
+    }
+
+    ion-button[fill="outline"] {
+      height: 50px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    padding: 12px;
+  }
+
+  .customization-section {
+    padding: 16px;
+    border-radius: 16px;
+
+    .section-header {
+      font-size: 1.1rem;
+      gap: 10px;
+    }
+
+    .options-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .option-chip {
+      min-height: 42px;
+      font-size: 0.85rem;
+      padding: 8px 12px;
     }
   }
 }

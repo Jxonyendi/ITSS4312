@@ -17,6 +17,11 @@ export const routes: Routes = [
           import('../orders/tab4.page').then((m) => m.OrderPage),
       },
       {
+        path: 'order/build-pizza',
+        loadComponent: () =>
+          import('../orders/build-pizza/build-pizza.page').then((m) => m.BuildPizzaPage),
+      },
+      {
         path: 'tracker',
         loadComponent: () =>
           import('../tracker/tracker.page').then((m) => m.TrackerPage),

@@ -187,9 +187,11 @@ export class LoginPage implements OnInit {
       } else {
         this.showToast(result.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       await loading.dismiss();
-      this.showToast('An error occurred. Please try again.');
+      console.error('Login/Register error:', error);
+      const errorMessage = error?.error?.message || error?.message || 'An error occurred. Please try again.';
+      this.showToast(errorMessage);
     }
   }
 

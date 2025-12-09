@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
-import { ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -23,10 +23,13 @@ import {
   IonNote,
   IonIcon,
 } from '@ionic/angular/standalone';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { checkmarkCircleOutline } from 'ionicons/icons';
+import { 
+  checkmarkCircleOutline, 
+  constructOutline,
+} from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 
 interface SpecialtyPizza {
@@ -40,6 +43,7 @@ interface SpecialtyPizza {
   tag?: string;
   tagPosition?: 'left' | 'right';
 }
+
 
 @Component({
   selector: 'app-order',
@@ -67,6 +71,7 @@ interface SpecialtyPizza {
     IonIcon,
     CommonModule,
     FormsModule,
+    CurrencyPipe,
     ChatWidgetComponent,
   ],
 })
@@ -137,9 +142,14 @@ export class OrderPage {
   maxNoteLength = 200;
   lastOrder: any = null;
 
-  constructor(private svc: EmergencyService, private toast: ToastController, private router: Router) {
+  constructor(
+    private svc: EmergencyService, 
+    private toast: ToastController, 
+    private router: Router
+  ) {
     addIcons({
       'checkmark-circle-outline': checkmarkCircleOutline,
+      'construct-outline': constructOutline,
     });
     
     const os = this.svc.getOrders();
@@ -211,6 +221,10 @@ export class OrderPage {
   async showToast(msg:string) {
     const t = await this.toast.create({message: msg, duration: 2000});
     t.present();
+  }
+
+  openBuildPizzaModal() {
+    this.router.navigate(['/tabs/order/build-pizza']);
   }
 }
 
