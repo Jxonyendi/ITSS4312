@@ -7,168 +7,94 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="account-content ion-padding">
-  <!-- HERO -->
-  <section class="hero">
-    <p class="eyebrow">Account Management</p>
-    <h1>Welcome, {{ currentUser?.username || 'User' }}!</h1>
-    <p class="supporting">
-      Manage your profile, trusted contacts, and emergency settings.
-    </p>
-    <div class="hero-chips">
-      <ion-chip color="light">Secure & Private</ion-chip>
-      <ion-chip color="light">Trusted Contacts</ion-chip>
-    </div>
-  </section>
+<ion-content class="ion-padding">
 
-  <!-- TRUSTED CONTACTS -->
-  <section class="account-sections">
-    <h2 class="section-title">Trusted Contacts</h2>
+  <h1>Welcome, {{ currentUser?.username || 'User' }}</h1>
 
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12" size-md="6" *ngFor="let c of contacts">
-          <ion-card class="contact-card">
-            <ion-card-header>
-              <ion-card-title>{{ c.name }}</ion-card-title>
-              <ion-card-subtitle>{{ c.phone }}</ion-card-subtitle>
-            </ion-card-header>
-            <ion-card-content>
-              <div class="contact-actions">
-                <ion-button fill="outline" size="small" (click)="edit(c)">
-                  Edit
-                </ion-button>
-                <ion-button
-                  fill="outline"
-                  size="small"
-                  color="danger"
-                  (click)="remove(c.id)"
-                >
-                  Remove
-                </ion-button>
-              </div>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+  <!-- 🔐 PIN LOCK -->
+  <ion-card *ngIf="!pinUnlocked">
+    <ion-card-header>
+      <ion-card-title>Payment Settings (Locked)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-input
+        type="password"
+        inputmode="numeric"
+        maxlength="4"
+        placeholder="Enter 4-digit PIN"
+        [(ngModel)]="pinInput">
+      </ion-input>
 
-    <ion-card class="add-contact-card">
+      <ion-button expand="block" (click)="unlock()">
+        Unlock
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 🔓 UNLOCKED CONTENT -->
+  <div *ngIf="pinUnlocked">
+
+    <!-- ✉️ PREWRITTEN MESSAGES -->
+    <ion-card>
       <ion-card-header>
-        <ion-card-title>
-          {{ editingContact ? 'Edit Contact' : 'Add New Contact' }}
-        </ion-card-title>
+        <ion-card-title>Prewritten Messages</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+
+        <p *ngFor="let m of messages">• {{ m }}</p>
+
+        <ion-textarea
+          placeholder="Create new message"
+          [(ngModel)]="newMessage">
+        </ion-textarea>
+
+        <ion-button expand="block" (click)="saveMessage()">
+          Save Message
+        </ion-button>
+
+      </ion-card-content>
+    </ion-card>
+
+    <!-- 🍕 PIZZA → ACTION MAPPING -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Pizza Code Mapping</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        <form [formGroup]="contactForm">
-          <ion-item>
-            <ion-label position="stacked">Name</ion-label>
-            <ion-input
-              formControlName="name"
-              placeholder="Enter contact name"
-            ></ion-input>
-          </ion-item>
+        <ion-grid>
 
-          <ion-item>
-            <ion-label position="stacked">Phone Number</ion-label>
-            <ion-input
-              formControlName="phone"
-              type="tel"
-              placeholder="123-456-7890"
-            ></ion-input>
-          </ion-item>
+          <ion-row *ngFor="let m of pizzaMappings; let i = index">
+            <ion-col size="6">
+              <ion-select [(ngModel)]="m.topping">
+                <ion-select-option *ngFor="let t of toppings" [value]="t">
+                  {{ t }}
+                </ion-select-option>
+              </ion-select>
+            </ion-col>
 
-          <div class="form-actions">
-            <ion-button expand="block" (click)="editingContact ? update() : add()">
-              {{ editingContact ? 'Update Contact' : 'Add Contact' }}
-            </ion-button>
+            <ion-col size="6">
+              <ion-select [(ngModel)]="m.action">
+                <ion-select-option value="SMS">Send Text</ion-select-option>
+                <ion-select-option value="UBER">Order Uber</ion-select-option>
+                <ion-select-option value="LOCATION">Share Location</ion-select-option>
+              </ion-select>
+            </ion-col>
+          </ion-row>
 
-            <ion-button
-              *ngIf="editingContact"
-              expand="block"
-              fill="outline"
-              (click)="cancelEdit()"
-            >
-              Cancel
-            </ion-button>
-          </div>
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </section>
+        </ion-grid>
 
-  <!-- 🔒 PAYMENT SETTINGS (PIN LOCKED) -->
-  <section class="messages-section">
-    <h2 class="section-title">Payment Settings</h2>
-
-    <!-- LOCK SCREEN -->
-    <ion-card *ngIf="!pinUnlocked">
-      <ion-card-content>
-        <p>
-          This section is protected. Enter your 4-digit PIN to continue.
-        </p>
-
-        <ion-item>
-          <ion-label position="stacked">4-Digit PIN</ion-label>
-          <ion-input
-            type="password"
-            maxlength="4"
-            [(ngModel)]="enteredPin"
-          ></ion-input>
-        </ion-item>
-
-        <ion-button expand="block" (click)="unlockPin()">
-          Unlock
+        <ion-button expand="block" fill="outline" (click)="addMapping()">
+          Add Mapping
         </ion-button>
+
+        <ion-button expand="block" (click)="savePizzaMappings()">
+          Save Settings
+        </ion-button>
+
       </ion-card-content>
     </ion-card>
 
-    <!-- UNLOCKED CONTENT -->
-    <ion-grid *ngIf="pinUnlocked">
-      <ion-row>
-        <ion-col size="12" size-md="6" *ngFor="let m of messages; let i = index">
-          <ion-card class="message-card">
-            <ion-card-content>
-              <ion-item>
-                <ion-label position="stacked">Emergency Message</ion-label>
-                <ion-select interface="popover">
-                  <ion-select-option value="{{ m }}">
-                    {{ m }}
-                  </ion-select-option>
-                  <ion-select-option value="I feel unsafe. Please respond.">
-                    I feel unsafe. Please respond.
-                  </ion-select-option>
-                  <ion-select-option value="Please call me immediately.">
-                    Please call me immediately.
-                  </ion-select-option>
-                  <ion-select-option value="I need help but cannot talk.">
-                    I need help but cannot talk.
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
+  </div>
 
-              <ion-button
-                expand="block"
-                fill="outline"
-                size="small"
-                (click)="sendPreview(i)"
-              >
-                Send Preview
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </section>
-
-  <!-- LOGOUT -->
-  <section class="logout-section">
-    <ion-button expand="block" color="danger" size="large" (click)="logout()">
-      Logout
-    </ion-button>
-  </section>
-
-  <app-chat-widget></app-chat-widget>
 </ion-content>

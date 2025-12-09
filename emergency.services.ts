@@ -1,3 +1,4 @@
+// src/app/services/emergency.services.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Geolocation } from '@capacitor/geolocation';
@@ -6,11 +7,23 @@ import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
 import { SmsManager } from '@byteowls/capacitor-sms';
 
+/*
+ * ============================
+ * Types / Interfaces
+ * ============================
+ */
+
+export type PizzaTriggerAction =
+  | 'ORDER_UBER_HOME'
+  | 'SEND_HELP_TEXT'
+  | 'CALL_PRIMARY'
+  | 'SHARE_LOCATION';
+
 export interface PizzaCodeAction {
   id: string;
-  topping: string;
-  action: 'SMS' | 'LOCATION' | 'UBER';
-  payload?: any;
+  topping: string;            // display name like 'Pepperoni'
+  action: PizzaTriggerAction; // one of the app-level triggers
+  payload?: any;              // optional extra (e.g., index into messages)
 }
 
 export interface Contact {
@@ -35,7 +48,6 @@ export interface Order {
   placedAt: number;
   etaMinutes?: number;
   fakeCourierName?: string;
-  // Optional pizza metadata for orders created from the pizza menu
   pizzaId?: string;
   pizzaName?: string;
   pizzaImage?: string;
@@ -58,38 +70,72 @@ interface ApiOrder {
   note?: string;
 }
 
+/*
+ * ============================
+ * Service
+ * ============================
+ */
+
 @Injectable({
   providedIn: 'root'
 })
 export class EmergencyService {
+  // Reactive stores
   contacts$ = new BehaviorSubject<Contact[]>([]);
   orders$ = new BehaviorSubject<Order[]>([]);
+
+  // Prewritten messages (can be extended by user)
   messages: string[] = [
     'I need help. Please call me.',
     'I am okay. No help needed.',
     'Emergency situation. Please respond immediately.'
   ];
 
+  // localStorage keys
   private readonly CONTACTS_STORAGE_KEY = 'pizza_time_contacts';
   private readonly ORDERS_STORAGE_KEY = 'pizza_time_orders';
+  private readonly MESSAGES_STORAGE_KEY = 'pizza_time_messages';
+  private readonly PIZZA_CODES_KEY = 'pizza_time_codes';
+
+  // PIN constants (single place)
+  private readonly PIZZA_PIN_KEY = 'pizza_time_pin';
+  private readonly DEFAULT_PIN = '1234';
+
+  // Default pizza code mappings (use app-level trigger names)
+  private pizzaCodes: PizzaCodeAction[] = [
+    // payload: index into messages[] for SEND_HELP_TEXT
+    { id: 'cheese', topping: 'Cheese', action: 'SEND_HELP_TEXT', payload: 1 },
+    { id: 'pepperoni', topping: 'Pepperoni', action: 'ORDER_UBER_HOME' },
+    { id: 'veggie', topping: 'Veggie', action: 'SHARE_LOCATION' }
+  ];
 
   constructor(private apiService: ApiService) {
-    // Initialize with data from API or localStorage
+    // Initialize state from backend or storage
     this.loadContacts();
     this.loadOrders();
+    this.loadMessages();
+    this.loadPizzaCodes();
+
+    // Ensure a default PIN exists so 1234 unlocks by default
+    try {
+      const storedPin = localStorage.getItem(this.PIZZA_PIN_KEY);
+      if (!storedPin) {
+        localStorage.setItem(this.PIZZA_PIN_KEY, this.DEFAULT_PIN);
+      }
+    } catch (err) {
+      console.warn('Could not initialize default PIN in localStorage', err);
+    }
   }
 
-  /**
-   * Load contacts from API or localStorage
-   */
+  /* ============================
+     Contacts
+   ============================ */
+
   private async loadContacts(): Promise<void> {
     if (environment.useBackend) {
       try {
-        const response = await firstValueFrom(
-          this.apiService.get<ApiContact[]>('contacts')
-        );
+        const response = await firstValueFrom(this.apiService.get<ApiContact[]>('contacts'));
         if (response.success && response.data) {
-          // Convert API contacts to app format
           const contacts = response.data.map((c: ApiContact) => ({
             id: c.id || c._id || '',
             name: c.name,
@@ -97,20 +143,17 @@ export class EmergencyService {
             isPrimary: c.isPrimary
           }));
           this.contacts$.next(contacts);
+          return;
         }
       } catch (error) {
         console.error('Failed to load contacts from API:', error);
-        // Fallback to localStorage
-        this.loadContactsFromStorage();
       }
-    } else {
-      this.loadContactsFromStorage();
     }
+
+    // Fallback to localStorage
+    this.loadContactsFromStorage();
   }
 
-  /**
-   * Load contacts from localStorage
-   */
   private loadContactsFromStorage(): void {
     try {
       const data = localStorage.getItem(this.CONTACTS_STORAGE_KEY);
@@ -122,17 +165,112 @@ export class EmergencyService {
     }
   }
 
-  /**
-   * Load orders from API or localStorage
-   */
+  private saveContactsToStorage(): void {
+    try {
+      localStorage.setItem(this.CONTACTS_STORAGE_KEY, JSON.stringify(this.contacts$.value));
+    } catch (error) {
+      console.error('Failed to save contacts to storage:', error);
+    }
+  }
+
+  async addContact(contact: Contact): Promise<void> {
+    if (environment.useBackend) {
+      try {
+        const response = await firstValueFrom(this.apiService.post<ApiContact>('contacts', {
+          name: contact.name,
+          phone: contact.phone,
+          isPrimary: contact.isPrimary
+        }));
+
+        if (response.success && response.data) {
+          const apiContact = response.data as ApiContact;
+          const newContact: Contact = {
+            id: apiContact.id || apiContact._id || '',
+            name: apiContact.name,
+            phone: apiContact.phone,
+            isPrimary: apiContact.isPrimary
+          };
+          this.contacts$.next([...this.contacts$.value, newContact]);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to add contact via API:', error);
+      }
+    }
+
+    // Local fallback
+    const current = this.contacts$.value;
+    this.contacts$.next([...current, contact]);
+    this.saveContactsToStorage();
+  }
+
+  async updateContact(updatedContact: Contact): Promise<void> {
+    if (environment.useBackend) {
+      try {
+        const response = await firstValueFrom(this.apiService.put<ApiContact>(`contacts/${updatedContact.id}`, {
+          name: updatedContact.name,
+          phone: updatedContact.phone,
+          isPrimary: updatedContact.isPrimary
+        }));
+
+        if (response.success && response.data) {
+          const apiContact = response.data as ApiContact;
+          const updated: Contact = {
+            id: apiContact.id || apiContact._id || '',
+            name: apiContact.name,
+            phone: apiContact.phone,
+            isPrimary: apiContact.isPrimary
+          };
+          const list = [...this.contacts$.value];
+          const idx = list.findIndex(c => c.id === updated.id);
+          if (idx !== -1) {
+            list[idx] = updated;
+            this.contacts$.next(list);
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to update contact via API:', error);
+      }
+    }
+
+    // Local fallback
+    const local = [...this.contacts$.value];
+    const index = local.findIndex(c => c.id === updatedContact.id);
+    if (index !== -1) {
+      local[index] = updatedContact;
+      this.contacts$.next(local);
+      this.saveContactsToStorage();
+    }
+  }
+
+  async removeContact(id: string): Promise<void> {
+    if (environment.useBackend) {
+      try {
+        const response = await firstValueFrom(this.apiService.delete<Contact>(`contacts/${id}`));
+        if (response.success) {
+          this.contacts$.next(this.contacts$.value.filter(c => c.id !== id));
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to remove contact via API:', error);
+      }
+    }
+
+    // Local fallback
+    this.contacts$.next(this.contacts$.value.filter(c => c.id !== id));
+    this.saveContactsToStorage();
+  }
+
+  /* ============================
+     Orders
+   ============================ */
+
   private async loadOrders(): Promise<void> {
     if (environment.useBackend) {
       try {
-        const response = await firstValueFrom(
-          this.apiService.get<ApiOrder[]>('orders')
-        );
+        const response = await firstValueFrom(this.apiService.get<ApiOrder[]>('orders'));
         if (response.success && response.data) {
-          // Convert API orders to app format
           const orders = response.data.map((o: ApiOrder) => ({
             id: o.id || o._id || '',
             status: o.status,
@@ -146,20 +284,16 @@ export class EmergencyService {
             note: o.note
           }));
           this.orders$.next(orders);
+          return;
         }
       } catch (error) {
         console.error('Failed to load orders from API:', error);
-        // Fallback to localStorage
-        this.loadOrdersFromStorage();
       }
-    } else {
-      this.loadOrdersFromStorage();
     }
+
+    this.loadOrdersFromStorage();
   }
 
-  /**
-   * Load orders from localStorage
-   */
   private loadOrdersFromStorage(): void {
     try {
       const data = localStorage.getItem(this.ORDERS_STORAGE_KEY);
@@ -171,257 +305,14 @@ export class EmergencyService {
     }
   }
 
-  /**
-   * Broadcast message to all saved contacts
-   * Uses real SMS on device, mock in browser
-   */
-  async broadcastToContacts(type: number): Promise<any> {
-    const message = this.messages[type] || this.messages[0];
-    const contacts = this.contacts$.value;
-    
-    if (contacts.length === 0) {
-      return { success: false, message: 'No contacts saved' };
-    }
-
-    const results = [];
-    for (const contact of contacts) {
-      const result = await this.sendMockSms(contact.phone, message);
-      results.push({ contact: contact.name, ...result });
-    }
-
-    return {
-      success: results.every(r => r.success),
-      type,
-      message,
-      results,
-      sentTo: contacts.length,
-    };
-  }
-
-  /**
-   * Send SMS - sends directly from app on mobile (FREE - uses device SMS)
-   * Opens SMS app on browser/desktop
-   */
-  async sendMockSms(phone: string, msg: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // Clean phone number (remove non-digits except +)
-      const cleanPhone = phone.replace(/[^\d+]/g, '');
-      
-      if (Capacitor.isNativePlatform()) {
-        // REAL SMS - Opens SMS app with message pre-filled (FREE - uses device SMS)
-        try {
-          // Opens native SMS app with message pre-filled
-          await SmsManager.send({
-            numbers: [cleanPhone],
-            text: msg
-          });
-          
-          return { success: true, message: 'SMS app opened with message ready to send!' };
-        } catch (smsError: any) {
-          console.error('SMS error:', smsError);
-          // Handle specific error codes
-          if (smsError.code === 'SEND_CANCELLED') {
-            return { success: false, message: 'SMS cancelled by user' };
-          } else if (smsError.code === 'ERR_SERVICE_NOTFOUND') {
-            return { success: false, message: 'SMS service not available on this device' };
-          } else if (smsError.code === 'UNIMPLEMENTED') {
-            // Fallback to sms: link
-            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
-            return { success: true, message: 'SMS app opened' };
-          }
-          return { 
-            success: false, 
-            message: `Failed to open SMS: ${smsError.message || smsError.code || 'Unknown error'}` 
-          };
-        }
-      } else {
-        // Browser/Desktop: Open SMS app or WhatsApp Web
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-          // Mobile browser: Open native SMS app
-          window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
-          return { success: true, message: 'SMS app opened' };
-        } else {
-          // Desktop: Open WhatsApp Web (works without account)
-          const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-          window.open(whatsappUrl, '_blank');
-          return { success: true, message: 'WhatsApp Web opened - send message there' };
-        }
-      }
-    } catch (error: any) {
-      return { success: false, message: `Failed to send SMS: ${error.message || 'Unknown error'}` };
-    }
-  }
-
-  async setOrderStatus(status: 'placed'|'accepted'|'on_the_way'|'delivered'|'cancelled'): Promise<void> {
-    const currentOrders = this.orders$.value;
-    if (currentOrders.length > 0) {
-      const activeOrder = currentOrders.find(
-        o => o.status !== 'cancelled' && o.status !== 'delivered'
-      );
-      if (activeOrder) {
-        await this.setOrderStatusById(activeOrder.id, status);
-      }
-    }
-  }
-
-  async setOrderStatusById(orderId: string, status: 'placed'|'accepted'|'on_the_way'|'delivered'|'cancelled'): Promise<void> {
-    const currentOrders = this.orders$.value;
-    const orderToUpdate = currentOrders.find(o => o.id === orderId);
-    if (orderToUpdate) {
-      if (environment.useBackend) {
-        try {
-          const response = await firstValueFrom(
-            this.apiService.put<Order>(`orders/${orderId}`, { status })
-          );
-          if (response.success && response.data) {
-            // Update local state
-            const updated = currentOrders.map(o => 
-              o.id === orderId ? { ...o, status } : o
-            );
-            this.orders$.next(updated);
-          }
-        } catch (error) {
-          console.error('Failed to update order status:', error);
-          // Fallback to local update
-          const updated = currentOrders.map(o => 
-            o.id === orderId ? { ...o, status } : o
-          );
-          this.orders$.next(updated);
-          this.saveOrdersToStorage();
-        }
-      } else {
-        const updated = currentOrders.map(o => 
-          o.id === orderId ? { ...o, status } : o
-        );
-        this.orders$.next(updated);
-        this.saveOrdersToStorage();
-      }
-    }
-  }
-
-  getOrders(): Order[] {
-    return this.orders$.value;
-  }
-
-  /**
-   * Save orders to localStorage (fallback)
-   */
   private saveOrdersToStorage(): void {
-    if (!environment.useBackend) {
+    try {
       localStorage.setItem(this.ORDERS_STORAGE_KEY, JSON.stringify(this.orders$.value));
-    }
-  }
-
-  /**
-   * Get real device location using Capacitor Geolocation
-   * Falls back to mock location if not available
-   */
-  async getMockLocation(): Promise<any> {
-    try {
-      // Check if running on native platform
-      if (Capacitor.isNativePlatform()) {
-        const position = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 10000,
-        });
-        
-        return {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
-          accuracy: position.coords.accuracy,
-        };
-      } else {
-        // Browser fallback - try HTML5 geolocation
-        return new Promise((resolve, reject) => {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                resolve({
-                  lat: position.coords.latitude,
-                  lng: position.coords.longitude,
-                  address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
-                  accuracy: position.coords.accuracy,
-                });
-              },
-              () => {
-                // Fallback to mock if geolocation fails
-                resolve(this.getFallbackLocation());
-              }
-            );
-          } else {
-            resolve(this.getFallbackLocation());
-          }
-        });
-      }
     } catch (error) {
-      // Fallback to mock location if geolocation fails
-      return this.getFallbackLocation();
+      console.error('Failed to save orders to storage:', error);
     }
   }
 
-  /**
-   * Fallback mock location
-   */
-  private getFallbackLocation(): any {
-    return {
-      lat: 32.7767,
-      lng: -96.7970,
-      address: 'Mock Location (Dallas, TX)',
-    };
-  }
-
-  /**
-   * Place Uber order - opens Uber deep link or app
-   * For production: Use Uber Ride Requests API (requires server-side OAuth)
-   */
-  async placeMockUberOrder(location: any): Promise<Order> {
-    try {
-      // Try to open Uber app with deep link
-      if (Capacitor.isNativePlatform()) {
-        // For iOS: uber://?action=setPickup&pickup[latitude]=${lat}&pickup[longitude]=${lng}
-        // For Android: uber://?action=setPickup&pickup[latitude]=${lat}&pickup[longitude]=${lng}
-        const uberUrl = `uber://?action=setPickup&pickup[latitude]=${location.lat}&pickup[longitude]=${location.lng}`;
-        
-        // Use Capacitor Browser or App plugin to open
-        // import { Browser } from '@capacitor/browser';
-        // await Browser.open({ url: uberUrl });
-      } else {
-        // Browser: Open Uber web or show message
-        // Optionally: window.open(`https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${location.lat}&pickup[longitude]=${location.lng}`);
-      }
-
-      // Create order record
-      const order: Order = {
-        id: Math.random().toString(36).substring(2, 15),
-        status: 'placed',
-        placedAt: Date.now(),
-        etaMinutes: 15,
-        fakeCourierName: 'Maya',
-      };
-      const currentOrders = this.orders$.value;
-      this.orders$.next([order, ...currentOrders]);
-      return order;
-    } catch (error) {
-      // Still create order even if deep link fails
-      const order: Order = {
-        id: Math.random().toString(36).substring(2, 15),
-        status: 'placed',
-        placedAt: Date.now(),
-        etaMinutes: 15,
-        fakeCourierName: 'Maya',
-      };
-      const currentOrders = this.orders$.value;
-      this.orders$.next([order, ...currentOrders]);
-      return order;
-    }
-  }
-
-  /**
-   * Place an order that includes pizza metadata (used by the pizza menu)
-   */
   async placePizzaOrder(payload: {
     pizzaId: string;
     pizzaName: string;
@@ -429,7 +320,7 @@ export class EmergencyService {
     pizzaPrice?: number;
     note?: string;
   }): Promise<Order> {
-    const orderData = {
+    const orderData: any = {
       status: 'placed' as const,
       placedAt: Date.now(),
       etaMinutes: 15,
@@ -438,14 +329,12 @@ export class EmergencyService {
       pizzaName: payload.pizzaName,
       pizzaImage: payload.pizzaImage,
       pizzaPrice: payload.pizzaPrice,
-      note: payload.note,
+      note: payload.note
     };
 
     if (environment.useBackend) {
       try {
-        const response = await firstValueFrom(
-          this.apiService.post<ApiOrder>('orders', orderData)
-        );
+        const response = await firstValueFrom(this.apiService.post<ApiOrder>('orders', orderData));
         if (response.success && response.data) {
           const apiOrder = response.data as ApiOrder;
           const order: Order = {
@@ -453,15 +342,13 @@ export class EmergencyService {
             ...orderData,
             placedAt: apiOrder.placedAt ? (typeof apiOrder.placedAt === 'number' ? apiOrder.placedAt : new Date(apiOrder.placedAt).getTime()) : Date.now()
           };
-          const currentOrders = this.orders$.value;
-          this.orders$.next([order, ...currentOrders]);
+          this.orders$.next([order, ...this.orders$.value]);
           return order;
         } else {
           throw new Error(response.message || 'Failed to create order');
         }
       } catch (error) {
         console.error('Failed to create order via API:', error);
-        // Fallback to local storage
         return this.createOrderLocally(orderData);
       }
     } else {
@@ -469,224 +356,366 @@ export class EmergencyService {
     }
   }
 
-  /**
-   * Create order locally (fallback)
-   */
   private createOrderLocally(orderData: any): Order {
     const order: Order = {
       id: Math.random().toString(36).substring(2, 15),
       ...orderData
     };
-    const currentOrders = this.orders$.value;
-    this.orders$.next([order, ...currentOrders]);
+    this.orders$.next([order, ...this.orders$.value]);
     this.saveOrdersToStorage();
     return order;
   }
 
-  async addContact(contact: Contact): Promise<void> {
+  async setOrderStatusById(orderId: string, status: 'placed'|'accepted'|'on_the_way'|'delivered'|'cancelled'): Promise<void> {
+    const currentOrders = this.orders$.value;
+    const orderToUpdate = currentOrders.find(o => o.id === orderId);
+    if (!orderToUpdate) return;
+
     if (environment.useBackend) {
       try {
-        const response = await firstValueFrom(
-          this.apiService.post<ApiContact>('contacts', {
-            name: contact.name,
-            phone: contact.phone,
-            isPrimary: contact.isPrimary
-          })
-        );
+        const response = await firstValueFrom(this.apiService.put<Order>(`orders/${orderId}`, { status }));
         if (response.success && response.data) {
-          const apiContact = response.data as ApiContact;
-          const newContact: Contact = {
-            id: apiContact.id || apiContact._id || '',
-            name: apiContact.name,
-            phone: apiContact.phone,
-            isPrimary: apiContact.isPrimary
-          };
-          const currentContacts = this.contacts$.value;
-          this.contacts$.next([...currentContacts, newContact]);
+          const updated = currentOrders.map(o => o.id === orderId ? { ...o, status } : o);
+          this.orders$.next(updated);
         }
       } catch (error) {
-        console.error('Failed to add contact via API:', error);
-        // Fallback to local storage
-        this.addContactLocally(contact);
+        console.error('Failed to update order status via API:', error);
+        const updated = currentOrders.map(o => o.id === orderId ? { ...o, status } : o);
+        this.orders$.next(updated);
+        this.saveOrdersToStorage();
       }
     } else {
-      this.addContactLocally(contact);
+      const updated = currentOrders.map(o => o.id === orderId ? { ...o, status } : o);
+      this.orders$.next(updated);
+      this.saveOrdersToStorage();
     }
   }
 
-  /**
-   * Add contact locally (fallback)
-   */
-  private addContactLocally(contact: Contact): void {
-    const currentContacts = this.contacts$.value;
-    this.contacts$.next([...currentContacts, contact]);
-    this.saveContactsToStorage();
+  getOrders(): Order[] {
+    return this.orders$.value;
   }
 
-  async updateContact(updatedContact: Contact): Promise<void> {
-    if (environment.useBackend) {
+  /* ============================
+     SMS / Broadcast
+   ============================ */
+
+  // Broadcast to all contacts (optionally append extra text)
+  async broadcastToContacts(type: number, extra?: string): Promise<any> {
+    const message = (this.messages[type] || this.messages[0]) + (extra ? `\n${extra}` : '');
+    const contacts = this.contacts$.value;
+
+    if (!contacts || contacts.length === 0) {
+      return { success: false, message: 'No contacts saved' };
+    }
+
+    const results: any[] = [];
+
+    for (const contact of contacts) {
       try {
-        const response = await firstValueFrom(
-          this.apiService.put<ApiContact>(`contacts/${updatedContact.id}`, {
-            name: updatedContact.name,
-            phone: updatedContact.phone,
-            isPrimary: updatedContact.isPrimary
-          })
-        );
-        if (response.success && response.data) {
-          const apiContact = response.data as ApiContact;
-          const updated: Contact = {
-            id: apiContact.id || apiContact._id || '',
-            name: apiContact.name,
-            phone: apiContact.phone,
-            isPrimary: apiContact.isPrimary
-          };
-          const currentContacts = this.contacts$.value;
-          const index = currentContacts.findIndex(c => c.id === updatedContact.id);
-          if (index !== -1) {
-            const updatedList = [...currentContacts];
-            updatedList[index] = updated;
-            this.contacts$.next(updatedList);
+        // sanitize phone
+        const cleanPhone = (contact.phone || '').replace(/[^\d+]/g, '');
+        if (Capacitor.isNativePlatform()) {
+          // try native SmsManager where available
+          try {
+            await SmsManager.send({ numbers: [cleanPhone], text: message });
+            results.push({ contact: contact.name, success: true });
+          } catch (smsErr: any) {
+            console.warn('SmsManager failed, fallback to sms: link', smsErr);
+            // fallback: open sms link
+            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            results.push({ contact: contact.name, success: true, fallback: true });
+          }
+        } else {
+          // Browser fallback: open WhatsApp web or sms link on mobile browsers
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if (isMobile) {
+            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            results.push({ contact: contact.name, success: true, fallback: 'sms_link' });
+          } else {
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            results.push({ contact: contact.name, success: true, fallback: 'whatsapp' });
           }
         }
-      } catch (error) {
-        console.error('Failed to update contact via API:', error);
-        // Fallback to local storage
-        this.updateContactLocally(updatedContact);
+      } catch (err: any) {
+        console.error('Failed to send/broadcast to contact', contact, err);
+        results.push({ contact: contact.name, success: false, error: err?.message || err });
       }
-    } else {
-      this.updateContactLocally(updatedContact);
     }
+
+    return {
+      success: results.every(r => r.success === true),
+      results,
+      sentTo: results.length,
+      message
+    };
   }
 
-  /**
-   * Update contact locally (fallback)
-   */
-  private updateContactLocally(updatedContact: Contact): void {
-    const currentContacts = this.contacts$.value;
-    const index = currentContacts.findIndex(c => c.id === updatedContact.id);
-    if (index !== -1) {
-      const updated = [...currentContacts];
-      updated[index] = updatedContact;
-      this.contacts$.next(updated);
-      this.saveContactsToStorage();
-    }
-  }
-
-  async removeContact(id: string): Promise<void> {
-    if (environment.useBackend) {
-      try {
-        const response = await firstValueFrom(
-          this.apiService.delete<Contact>(`contacts/${id}`)
-        );
-        if (response.success) {
-          const currentContacts = this.contacts$.value;
-          this.contacts$.next(currentContacts.filter(c => c.id !== id));
+  // Single-message helper used by contact-us page or anywhere else
+  async sendMockSms(phone: string, msg: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const cleanPhone = (phone || '').replace(/[^\d+]/g, '');
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await SmsManager.send({ numbers: [cleanPhone], text: msg });
+          return { success: true, message: 'SMS app opened with message ready to send!' };
+        } catch (smsError: any) {
+          console.error('SMS error:', smsError);
+          if (smsError.code === 'UNIMPLEMENTED') {
+            window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
+            return { success: true, message: 'SMS app opened' };
+          }
+          return { success: false, message: smsError.message || 'Failed to send SMS' };
         }
-      } catch (error) {
-        console.error('Failed to remove contact via API:', error);
-        // Fallback to local storage
-        this.removeContactLocally(id);
+      } else {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
+          return { success: true, message: 'SMS link opened' };
+        } else {
+          const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+          window.open(whatsappUrl, '_blank');
+          return { success: true, message: 'WhatsApp Web opened - send message there' };
+        }
       }
-    } else {
-      this.removeContactLocally(id);
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Unknown error' };
     }
   }
 
-  /**
-   * Remove contact locally (fallback)
-   */
-  private removeContactLocally(id: string): void {
-    const currentContacts = this.contacts$.value;
-    this.contacts$.next(currentContacts.filter(c => c.id !== id));
-    this.saveContactsToStorage();
-  }
+  /* ============================
+     Geolocation helpers
+   ============================ */
 
-  /**
-   * Save contacts to localStorage (fallback)
-   */
-  private saveContactsToStorage(): void {
-    if (!environment.useBackend) {
-      localStorage.setItem(this.CONTACTS_STORAGE_KEY, JSON.stringify(this.contacts$.value));
+  async getMockLocation(): Promise<any> {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
+        return {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
+          accuracy: position.coords.accuracy
+        };
+      } else {
+        // browser fallback
+        return new Promise((resolve) => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => resolve({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
+                accuracy: position.coords.accuracy
+              }),
+              () => resolve(this.getFallbackLocation())
+            );
+          } else {
+            resolve(this.getFallbackLocation());
+          }
+        });
+      }
+    } catch (error) {
+      return this.getFallbackLocation();
     }
   }
 
-    // ============================
-  // 🔐 PIZZA CODE SECURITY LOGIC
-  // ============================
-
-  private readonly PIZZA_PIN_KEY = 'pizza_time_pin';
-  private readonly PIZZA_CODES_KEY = 'pizza_time_codes';
-
-  // Default mappings (safe fallback)
-  private pizzaCodes: PizzaCodeAction[] = [
-    { id: 'cheese', topping: 'Cheese', action: 'SMS', payload: 1 },
-    { id: 'pepperoni', topping: 'Pepperoni', action: 'UBER' },
-    { id: 'veggie', topping: 'Veggie', action: 'LOCATION' }
-  ];
-
-  /** =====================
-   * 🔐 PIN MANAGEMENT
-   * ===================== */
-
-  async setPin(pin: string): Promise<void> {
-    localStorage.setItem(this.PIZZA_PIN_KEY, pin);
+  private getFallbackLocation(): any {
+    return {
+      lat: 32.7767,
+      lng: -96.7970,
+      address: 'Mock Location (Dallas, TX)'
+    };
   }
 
-  async verifyPin(pin: string): Promise<boolean> {
-    const savedPin = localStorage.getItem(this.PIZZA_PIN_KEY);
-    return savedPin === pin;
+  /* ============================
+     Place Uber (deep link + web fallback)
+     This is where the Uber web link you shared belongs.
+   ============================ */
+
+  async placeMockUberOrder(location: any): Promise<Order> {
+    try {
+      // Native deep link (attempt)
+      if (Capacitor.isNativePlatform()) {
+        const uberUrlNative = `uber://?action=setPickup&pickup[latitude]=${location.lat}&pickup[longitude]=${location.lng}`;
+        // If you want to use Capacitor Browser, import and call Browser.open({ url: uberUrlNative })
+        // but we won't throw on failure (deep link not available is normal).
+      } else {
+        // Browser fallback - open Uber mobile web link
+        const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${location.lat}&pickup[longitude]=${location.lng}`;
+        window.open(uberWeb, '_blank');
+      }
+
+      // Create an order record locally (or via API if desired)
+      const order: Order = {
+        id: Math.random().toString(36).substring(2, 15),
+        status: 'placed',
+        placedAt: Date.now(),
+        etaMinutes: 15,
+        fakeCourierName: 'Maya'
+      };
+
+      const currentOrders = this.orders$.value;
+      this.orders$.next([order, ...currentOrders]);
+
+      // If backend is enabled, optionally call API to persist order (omitted for simplicity)
+      return order;
+    } catch (error) {
+      console.error('placeMockUberOrder error:', error);
+      // still create order locally
+      const order: Order = {
+        id: Math.random().toString(36).substring(2, 15),
+        status: 'placed',
+        placedAt: Date.now(),
+        etaMinutes: 15,
+        fakeCourierName: 'Maya'
+      };
+      const currentOrders = this.orders$.value;
+      this.orders$.next([order, ...currentOrders]);
+      return order;
+    }
   }
 
-  /** =====================
-   * 🍕 PIZZA CODE MAPPING
-   * ===================== */
+  /* ============================
+     Pizza Code logic: get/save & execute
+   ============================ */
+
+  private loadPizzaCodes(): void {
+    try {
+      const raw = localStorage.getItem(this.PIZZA_CODES_KEY);
+      if (raw) {
+        this.pizzaCodes = JSON.parse(raw);
+      } else {
+        // ensure default persists if not present
+        this.savePizzaCodes(this.pizzaCodes);
+      }
+    } catch (error) {
+      console.error('Failed to load pizza codes from storage:', error);
+    }
+  }
 
   getPizzaCodes(): PizzaCodeAction[] {
-    const stored = localStorage.getItem(this.PIZZA_CODES_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-    return this.pizzaCodes;
+    return [...this.pizzaCodes];
   }
 
   savePizzaCodes(codes: PizzaCodeAction[]): void {
-    this.pizzaCodes = codes;
-    localStorage.setItem(this.PIZZA_CODES_KEY, JSON.stringify(codes));
+    try {
+      this.pizzaCodes = codes;
+      localStorage.setItem(this.PIZZA_CODES_KEY, JSON.stringify(codes));
+    } catch (error) {
+      console.error('Failed to save pizza codes:', error);
+    }
   }
 
-  /** =====================
-   * 🚨 EXECUTE PIZZA ACTION
-   * ===================== */
-
-  async executePizzaAction(topping: string): Promise<any> {
-    const codes = this.getPizzaCodes();
-    const match = codes.find(c => c.topping === topping);
+  // Execute the mapped action for a topping
+  async executePizzaAction(toppingIdOrName: string): Promise<any> {
+    // support either passing the id or the display topping string
+    const match = this.pizzaCodes.find(c => c.id === toppingIdOrName || c.topping === toppingIdOrName);
 
     if (!match) {
-      return { success: false, message: 'No action mapped' };
+      return { success: false, message: 'No action mapped for that topping' };
     }
 
     switch (match.action) {
+      case 'SEND_HELP_TEXT':
+        // payload -> index into messages array (optional)
+        return this.broadcastToContacts(typeof match.payload === 'number' ? match.payload : 0);
 
-      case 'SMS':
-        return await this.broadcastToContacts(
-          typeof match.payload === 'number' ? match.payload : 0
-        );
-
-      case 'LOCATION': {
+      case 'SHARE_LOCATION': {
         const loc = await this.getMockLocation();
-        return await this.broadcastToContacts(0);
+        // Broadcast default message + location appended
+        return this.broadcastToContacts(0, loc.address);
       }
 
-      case 'UBER': {
+      case 'ORDER_UBER_HOME': {
+        // get user location and try to place uber
         const loc = await this.getMockLocation();
-        return await this.placeMockUberOrder(loc);
+        return this.placeMockUberOrder(loc);
+      }
+
+      case 'CALL_PRIMARY': {
+        // Optionally implement call primary: open tel: link to primary contact if exists
+        const primary = this.contacts$.value.find(c => c.isPrimary) || this.contacts$.value[0];
+        if (!primary) return { success: false, message: 'No contact available to call' };
+        // open dialer
+        window.location.href = `tel:${(primary.phone || '').replace(/[^\d+]/g, '')}`;
+        return { success: true, called: primary.name };
       }
 
       default:
-        return { success: false, message: 'Unknown action' };
+        return { success: false, message: 'Unknown pizza action' };
     }
   }
 
+  /* ============================
+     Messages persistence & helpers
+   ============================ */
+
+  private loadMessages(): void {
+    try {
+      const raw = localStorage.getItem(this.MESSAGES_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.messages = parsed;
+        }
+      } else {
+        // ensure defaults are available if not stored
+        localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
+      }
+    } catch (error) {
+      console.error('Failed to load messages from storage:', error);
+    }
+  }
+
+  addCustomMessage(text: string): void {
+    if (!text || !text.trim()) return;
+    this.messages.push(text.trim());
+    try {
+      localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
+    } catch (err) {
+      console.error('Failed to save custom message:', err);
+    }
+  }
+
+  saveMessages(): void {
+    try {
+      localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
+    } catch (error) {
+      console.error('Failed to save messages:', error);
+    }
+  }
+
+  /* ============================
+     PIN management
+   ============================ */
+
+  // setPin & verifyPin use the single PIN key above
+  async setPin(pin: string): Promise<void> {
+    try {
+      if (!pin || pin.length < 4) return;
+      localStorage.setItem(this.PIZZA_PIN_KEY, pin);
+    } catch (err) {
+      console.error('Failed to save pin:', err);
+    }
+  }
+
+  async verifyPin(pin: string): Promise<boolean> {
+    try {
+      const saved = localStorage.getItem(this.PIZZA_PIN_KEY);
+      // fallback to DEFAULT_PIN if nothing in storage (ensures 1234 works)
+      return (saved ?? this.DEFAULT_PIN) === pin;
+    } catch {
+      return false;
+    }
+  }
+
+  /* ============================
+     Utility / debug helpers
+   ============================ */
+
+  // convenience wrapper if other code expects this name
+  async broadcastToContactsWithIndex(index: number) {
+    return this.broadcastToContacts(index);
+  }
 }

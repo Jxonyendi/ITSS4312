@@ -1,0 +1,191 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Contact Us</ion-title>
+    <ion-buttons slot="end">
+      <app-cart-button></app-cart-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contact-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">24/7 Customer Support</p>
+    <h1>We're here to help you</h1>
+    <p class="supporting">
+      Get instant support for orders, account issues, or any questions. Our team is ready to assist you.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">Average response: 2 min</ion-chip>
+      <ion-chip color="light">Available 24/7</ion-chip>
+    </div>
+  </section>
+
+  <section class="support-options">
+    <h2 class="section-title">Quick Support Options</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" size-lg="4" *ngFor="let option of supportOptions">
+          <ion-card (click)="selectSupportOption(option)" [class.selected]="selectedOption?.id === option.id">
+            <div class="card-icon">
+              <ion-icon [name]="option.icon" color="primary"></ion-icon>
+            </div>
+            <ion-card-header>
+              <ion-card-title>{{ option.title }}</ion-card-title>
+              <ion-card-subtitle>{{ option.subtitle }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ option.description }}</p>
+              <ion-button fill="clear" size="small" color="primary" (click)="handleSupportAction(option, $event)">
+                {{ option.actionText }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </section>
+
+  <section class="contact-methods">
+    <h2 class="section-title">Contact Methods</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngFor="let method of contactMethods">
+          <ion-card class="contact-card">
+            <ion-card-header>
+              <div class="contact-header">
+                <ion-icon [name]="method.icon" [color]="method.color"></ion-icon>
+                <ion-card-title>{{ method.title }}</ion-card-title>
+              </div>
+            </ion-card-header>
+            <ion-card-content>
+              <p class="contact-info">{{ method.info }}</p>
+              <p class="contact-hours" *ngIf="method.hours">{{ method.hours }}</p>
+              <ion-button fill="outline" size="small" [color]="method.color" (click)="handleContactMethod(method)">
+                {{ method.buttonText }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </section>
+
+  <section class="faq-section">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <ion-accordion-group>
+      <ion-accordion *ngFor="let faq of faqs" [value]="faq.id">
+        <ion-item slot="header">
+          <ion-label>
+            <h3>{{ faq.question }}</h3>
+          </ion-label>
+        </ion-item>
+        <div class="faq-content" slot="content">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </section>
+
+  <section class="support-history" *ngIf="supportHistory.length > 0">
+    <h2 class="section-title">Recent Support Requests</h2>
+    <ion-card *ngFor="let request of supportHistory" class="history-card">
+      <ion-card-header>
+        <div class="history-header">
+          <ion-card-title>{{ request.subject }}</ion-card-title>
+          <ion-chip [color]="getStatusColor(request.status)">{{ request.status }}</ion-chip>
+        </div>
+        <ion-card-subtitle>{{ formatDate(request.date) }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ request.message }}</p>
+        <p class="ticket-id">Ticket #{{ request.ticketId }}</p>
+      </ion-card-content>
+    </ion-card>
+  </section>
+
+  <section class="send-message-panel" *ngIf="selectedOption">
+    <div class="message-details">
+      <div>
+        <div class="selected-label">Selected Support Type</div>
+        <h2>{{ selectedOption.title }}</h2>
+        <p>{{ selectedOption.description }}</p>
+      </div>
+    </div>
+
+    <ion-item lines="none" class="message-field">
+      <ion-label position="stacked">Your Message</ion-label>
+      <ion-textarea
+        rows="4"
+        placeholder="Describe your issue or question..."
+        [(ngModel)]="supportMessage"
+      ></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="block" size="large" (click)="sendSupport()">
+      Send Support Message (Mock)
+    </ion-button>
+  </section>
+
+  <!-- Email Form Modal -->
+  <ion-modal [isOpen]="isEmailModalOpen" (willDismiss)="closeEmailModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Send Email</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeEmailModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="stacked">Your Name *</ion-label>
+          <ion-input 
+            type="text" 
+            [(ngModel)]="emailForm.name" 
+            placeholder="Enter your name"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Your Email *</ion-label>
+          <ion-input 
+            type="email" 
+            [(ngModel)]="emailForm.email" 
+            placeholder="your.email@example.com"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Subject</ion-label>
+          <ion-input 
+            type="text" 
+            [(ngModel)]="emailForm.subject" 
+            placeholder="Support Request"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Message *</ion-label>
+          <ion-textarea 
+            rows="6" 
+            [(ngModel)]="emailForm.message" 
+            placeholder="Enter your message here..."
+          ></ion-textarea>
+        </ion-item>
+
+        <ion-button 
+          expand="block" 
+          size="large" 
+          (click)="sendEmail()"
+          [disabled]="!emailForm.name || !emailForm.email || !emailForm.message"
+        >
+          Send Email
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
+</ion-content>

@@ -1,43 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { EmergencyService, Contact } from '../services/emergency.services';
+import { EmergencyService, PizzaCodeAction } from '../services/emergency.services';
 import { AuthService } from '../services/auth.service';
-import { ToastController, AlertController } from '@ionic/angular';
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
-  IonInput,
-  IonNote,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
-  IonCardContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonChip,
-  IonButtons,
-  IonSelect,
-  IonSelectOption
-} from '@ionic/angular/standalone';
-
+import { ToastController } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonTextarea, IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonButtons } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-  AbstractControl
-} from '@angular/forms';
-
-import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { FormsModule } from '@angular/forms';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 
 @Component({
@@ -46,141 +13,108 @@ import { CartButtonComponent } from '../components/cart-button/cart-button.compo
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     FormsModule,
-
     IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
     IonButton,
     IonInput,
-    IonNote,
+    IonTextarea,
+    IonSelect,
+    IonSelectOption,
     IonCard,
     IonCardHeader,
     IonCardTitle,
-    IonCardSubtitle,
     IonCardContent,
     IonGrid,
     IonRow,
     IonCol,
-    IonChip,
     IonButtons,
-    IonSelect,
-    IonSelectOption,
-
-    ChatWidgetComponent,
     CartButtonComponent
   ]
 })
 export class AccountPage implements OnInit {
-  contacts: Contact[] = [];
-  contactForm!: FormGroup;
-  editingContact: Contact | null = null;
-  messages: string[] = [];
-  currentUser: any = null;
 
-  // 🔒 PIN STATE
-  enteredPin = '';
+  currentUser: any;
+
+  // 🔐 PIN STATE
+  pinInput = '';
   pinUnlocked = false;
-  private readonly CORRECT_PIN = '1234'; // mock PIN for now
+
+  // ✉️ Messages
+  messages: string[] = [];
+  newMessage = '';
+
+  // 🍕 Pizza mappings
+  toppings = ['Cheese', 'Pepperoni', 'Veggie', 'Meat Lovers'];
+  pizzaMappings: PizzaCodeAction[] = [];
 
   constructor(
     private svc: EmergencyService,
-    private authService: AuthService,
-    private toast: ToastController,
-    private alertController: AlertController,
-    private fb: FormBuilder
-  ) {
-    this.svc.contacts$.subscribe(c => (this.contacts = c));
-    this.messages = this.svc.messages;
-    this.authService.currentUser.subscribe(user => {
-      this.currentUser = user;
-    });
-  }
+    private auth: AuthService,
+    private toast: ToastController
+  ) {}
 
   ngOnInit() {
-    this.contactForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      phone: ['', [Validators.required, this.phoneValidator]]
-    });
+    this.messages = [...this.svc.messages];
+    this.pizzaMappings = this.svc.getPizzaCodes();
+
+    this.auth.currentUser.subscribe(u => this.currentUser = u);
   }
 
-  // 🔓 PIN UNLOCK
-  unlockPin() {
-    if (this.enteredPin === this.CORRECT_PIN) {
+  /* ======================
+     🔐 PIN UNLOCK
+     ====================== */
+
+  async unlock() {
+    const ok = await this.svc.verifyPin(this.pinInput);
+    if (ok) {
       this.pinUnlocked = true;
-      this.showToast('Unlocked');
+      this.showToast('Settings unlocked');
     } else {
-      this.showToast('Incorrect PIN');
+      this.showToast('Invalid PIN');
     }
   }
 
-  phoneValidator(control: AbstractControl) {
-    if (!control.value) return null;
-    const phoneRegex =
-      /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
-    return phoneRegex.test(control.value.replace(/\s/g, ''))
-      ? null
-      : { invalidPhone: true };
+  /* ======================
+     ✉️ CUSTOM MESSAGES
+     ====================== */
+
+  saveMessage() {
+    if (!this.newMessage.trim()) return;
+
+    this.messages.push(this.newMessage.trim());
+    this.svc.messages = [...this.messages];
+    this.newMessage = '';
+    this.showToast('Message saved');
   }
 
-  async add() {
-    if (this.contactForm.invalid) return;
-    const v = this.contactForm.value;
-    const c: Contact = {
-      id: Math.random().toString(36).slice(2, 9),
-      name: v.name.trim(),
-      phone: v.phone.trim()
-    };
-    await this.svc.addContact(c);
-    this.contactForm.reset();
-    this.showToast('Contact saved');
+  /* ======================
+     🍕 PIZZA MAPPINGS
+     ====================== */
+
+  addMapping() {
+  this.pizzaMappings.push({
+    id: Math.random().toString(36).substring(2),
+    topping: 'Cheese',
+    action: 'SEND_HELP_TEXT',
+    payload: 0
+  });
+}
+
+
+  savePizzaMappings() {
+    this.svc.savePizzaCodes(this.pizzaMappings);
+    this.showToast('Pizza mappings saved');
   }
 
-  edit(c: Contact) {
-    this.editingContact = c;
-    this.contactForm.patchValue(c);
-  }
+  /* ======================
+     UI
+     ====================== */
 
-  async update() {
-    if (!this.editingContact) return;
-    const v = this.contactForm.value;
-    await this.svc.updateContact({
-      ...this.editingContact,
-      name: v.name.trim(),
-      phone: v.phone.trim()
-    });
-    this.editingContact = null;
-    this.contactForm.reset();
-    this.showToast('Contact updated');
-  }
-
-  cancelEdit() {
-    this.editingContact = null;
-    this.contactForm.reset();
-  }
-
-  async remove(id: string) {
-    await this.svc.removeContact(id);
-    this.showToast('Contact removed');
-  }
-
-  async sendPreview(i: number) {
-    await this.svc.broadcastToContacts(i);
-    this.showToast('Preview sent');
-  }
-
-  logout() {
-    this.authService.logout();
-    this.showToast('Logged out');
-  }
-
-  async showToast(msg: string) {
-    const t = await this.toast.create({ message: msg, duration: 1500 });
+  async showToast(message: string) {
+    const t = await this.toast.create({ message, duration: 1500 });
     t.present();
   }
 }
