@@ -2,6 +2,7 @@
   <ion-toolbar>
     <ion-title>Order Pizza</ion-title>
     <ion-buttons slot="end">
+      <app-address-display></app-address-display>
       <app-settings-button></app-settings-button>
       <app-cart-button></app-cart-button>
     </ion-buttons>
@@ -14,7 +15,7 @@
     <p class="eyebrow">🍕 Fresh & Hot</p>
     <h1>Choose Your Perfect Pizza</h1>
     <p class="supporting">
-      Browse our specialty pizzas, customize your order, and get it delivered hot and fresh to your door.
+      Customize your order and get it delivered hot and fresh to your door.
     </p>
     <div class="hero-chips">
       <ion-chip color="light">30-Min Delivery</ion-chip>
@@ -31,33 +32,25 @@
     </ion-button>
   </section>
 
-  <!-- Pizza Menu Grid -->
-  <section class="pizza-menu">
+  <!-- Specialty Pizzas -->
+  <section class="specialty-pizzas">
     <h2 class="section-title">Specialty Pizzas</h2>
     <ion-grid>
       <ion-row>
         <ion-col size="12" size-md="6" size-lg="4" *ngFor="let pizza of specialtyPizzas">
-          <ion-card class="pizza-card">
-            <div class="pizza-image-wrapper">
-              <img [src]="pizza.image" [alt]="pizza.name" class="pizza-image" />
-              <div *ngIf="pizza.tag" 
-                   class="pizza-badge" 
-                   [class.badge-left]="pizza.tagPosition === 'left'" 
-                   [class.badge-right]="pizza.tagPosition === 'right'"
-                   [class.badge-favorite]="pizza.tag === 'Fan Favorite'"
-                   [class.badge-limited]="pizza.tag === 'Limited Time'">
-                {{ pizza.tag }}
-              </div>
-            </div>
+          <ion-card class="pizza-card" (click)="viewPizza(pizza)">
             <ion-card-header>
-              <ion-card-title>{{ pizza.name }}</ion-card-title>
+              <div class="pizza-header-top">
+                <ion-card-title>{{ pizza.name }}</ion-card-title>
+                <ion-chip *ngIf="pizza.tag" class="pizza-tag">{{ pizza.tag }}</ion-chip>
+              </div>
               <ion-card-subtitle>{{ pizza.crust }} • {{ pizza.calories }} cal/slice</ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
               <p class="pizza-description">{{ pizza.description }}</p>
-              <div class="pizza-footer">
-                <span class="pizza-price">{{ pizza.price | currency: 'USD' }}</span>
-                <ion-button expand="block" fill="solid" color="primary" class="order-btn" (click)="addToOrders(pizza, $event)">
+              <div class="pizza-price-row">
+                <span class="price">{{ pizza.price | currency: 'USD' }}</span>
+                <ion-button size="small" fill="clear" color="primary" (click)="addToCart(pizza, $event)">
                   Add to Cart
                 </ion-button>
               </div>

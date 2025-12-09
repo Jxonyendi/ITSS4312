@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../components/address-display/address-display.component';
 
 @Component({
   selector: 'app-tracker',
@@ -31,7 +32,8 @@ import { SettingsButtonComponent } from '../components/settings-button/settings-
     CommonModule,
     ChatWidgetComponent,
     CartButtonComponent,
-    SettingsButtonComponent
+    SettingsButtonComponent,
+    AddressDisplayComponent
   ],
   standalone: true
 })
@@ -202,6 +204,31 @@ export class TrackerPage implements OnInit, OnDestroy {
         await this.emergencyService.setOrderStatusById(order.id, 'delivered');
       }
     }
+  }
+
+  /**
+   * Format address for display
+   */
+  formatAddress(order: Order): string {
+    if (!order.address) {
+      return '';
+    }
+    const parts: string[] = [];
+    if (order.address.street) parts.push(order.address.street);
+    if (order.address.city) parts.push(order.address.city);
+    if (order.address.state) parts.push(order.address.state);
+    if (order.address.zipCode) parts.push(order.address.zipCode);
+    return parts.join(', ');
+  }
+
+  /**
+   * Get delivery type display text
+   */
+  getDeliveryTypeText(order: Order): string {
+    if (!order.deliveryType) {
+      return '';
+    }
+    return order.deliveryType === 'carry' ? 'Carry Out' : 'Delivery';
   }
 }
 

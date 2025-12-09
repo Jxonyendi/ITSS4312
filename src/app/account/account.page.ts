@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../components/address-display/address-display.component';
 
 @Component({
   selector: 'app-account',
@@ -33,7 +34,8 @@ import { SettingsButtonComponent } from '../components/settings-button/settings-
     IonCol,
     IonButtons,
     CartButtonComponent,
-    SettingsButtonComponent
+    SettingsButtonComponent,
+    AddressDisplayComponent
   ]
 })
 export class AccountPage implements OnInit {

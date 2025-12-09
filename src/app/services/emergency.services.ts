@@ -53,6 +53,15 @@ export interface Order {
   pizzaImage?: string;
   pizzaPrice?: number;
   note?: string;
+  deliveryType?: 'carry' | 'delivery';
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    apt?: string;
+    instructions?: string;
+  };
 }
 
 // API response type (MongoDB returns _id)
@@ -68,6 +77,15 @@ interface ApiOrder {
   pizzaImage?: string;
   pizzaPrice?: number;
   note?: string;
+  deliveryType?: 'carry' | 'delivery';
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    apt?: string;
+    instructions?: string;
+  };
 }
 
 /*
@@ -281,7 +299,9 @@ export class EmergencyService {
             pizzaName: o.pizzaName,
             pizzaImage: o.pizzaImage,
             pizzaPrice: o.pizzaPrice,
-            note: o.note
+            note: o.note,
+            deliveryType: o.deliveryType,
+            address: o.address
           }));
           this.orders$.next(orders);
           return;
@@ -319,6 +339,15 @@ export class EmergencyService {
     pizzaImage?: string;
     pizzaPrice?: number;
     note?: string;
+    deliveryType?: 'carry' | 'delivery';
+    address?: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      apt?: string;
+      instructions?: string;
+    };
   }): Promise<Order> {
     const orderData: any = {
       status: 'placed' as const,
@@ -329,7 +358,9 @@ export class EmergencyService {
       pizzaName: payload.pizzaName,
       pizzaImage: payload.pizzaImage,
       pizzaPrice: payload.pizzaPrice,
-      note: payload.note
+      note: payload.note,
+      deliveryType: payload.deliveryType,
+      address: payload.address
     };
 
     if (environment.useBackend) {
@@ -340,7 +371,9 @@ export class EmergencyService {
           const order: Order = {
             id: apiOrder.id || apiOrder._id || '',
             ...orderData,
-            placedAt: apiOrder.placedAt ? (typeof apiOrder.placedAt === 'number' ? apiOrder.placedAt : new Date(apiOrder.placedAt).getTime()) : Date.now()
+            placedAt: apiOrder.placedAt ? (typeof apiOrder.placedAt === 'number' ? apiOrder.placedAt : new Date(apiOrder.placedAt).getTime()) : Date.now(),
+            deliveryType: apiOrder.deliveryType || orderData.deliveryType,
+            address: apiOrder.address || orderData.address
           };
           this.orders$.next([order, ...this.orders$.value]);
           return order;

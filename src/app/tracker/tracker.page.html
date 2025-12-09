@@ -2,6 +2,7 @@
   <ion-toolbar>
     <ion-title>Order Tracker</ion-title>
     <ion-buttons slot="end">
+      <app-address-display></app-address-display>
       <app-settings-button></app-settings-button>
       <app-cart-button></app-cart-button>
     </ion-buttons>
@@ -39,6 +40,8 @@
               <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong> — {{ order.pizzaPrice | currency:'USD' }}</p>
               <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
               <p *ngIf="getRemainingETA(order) !== null">ETA: <strong>{{ getETAText(order) }}</strong></p>
+              <p *ngIf="order.deliveryType"><strong>{{ getDeliveryTypeText(order) }}</strong></p>
+              <p *ngIf="formatAddress(order)">{{ formatAddress(order) }}</p>
               <p *ngIf="order.fakeCourierName">Courier: <strong>{{ order.fakeCourierName }}</strong></p>
               <p *ngIf="order.note">Note: {{ order.note }}</p>
             </ion-label>
@@ -85,6 +88,8 @@
               <p *ngIf="order.pizzaName"><strong>{{ order.pizzaName }}</strong> — {{ order.pizzaPrice | currency:'USD' }}</p>
               <p>Status: <strong>{{ getStatusText(order.status) }}</strong></p>
               <p *ngIf="getRemainingETA(order) !== null">ETA: {{ getETAText(order) }}</p>
+              <p *ngIf="order.deliveryType"><strong>{{ getDeliveryTypeText(order) }}</strong></p>
+              <p *ngIf="formatAddress(order)">{{ formatAddress(order) }}</p>
               <p *ngIf="order.fakeCourierName">Courier: {{ order.fakeCourierName }}</p>
               <p *ngIf="order.note">Note: {{ order.note }}</p>
               <p class="order-time">Placed: {{ formatDate(order.placedAt) }}</p>

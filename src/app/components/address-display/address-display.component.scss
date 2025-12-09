@@ -1,0 +1,50 @@
+:host {
+  .address-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(227, 24, 55, 0.1);
+    border-radius: 20px;
+    margin-right: 8px;
+    max-width: 200px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(227, 24, 55, 0.15);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    ion-icon {
+      font-size: 18px;
+      color: #e31837;
+      flex-shrink: 0;
+    }
+
+    ion-label {
+      font-size: 0.75rem;
+      color: #1d1d1d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    .address-display {
+      max-width: 150px;
+      
+      ion-label {
+        font-size: 0.7rem;
+      }
+    }
+  }
+}
+

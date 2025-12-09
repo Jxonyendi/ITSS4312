@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../components/address-display/address-display.component';
 
 @Component({
   selector: 'app-order-history',
@@ -31,7 +32,8 @@ import { SettingsButtonComponent } from '../components/settings-button/settings-
     FormsModule,
     ChatWidgetComponent,
     CartButtonComponent,
-    SettingsButtonComponent
+    SettingsButtonComponent,
+    AddressDisplayComponent
   ],
   standalone: true
 })

@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
 import { CartService } from '../services/cart.service';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons, IonModal, IonInput } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
+import { bagOutline, carOutline } from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../components/address-display/address-display.component';
 
 interface FeaturedPizza {
   id: string;
@@ -37,11 +39,9 @@ interface Deal {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons, CommonModule, CurrencyPipe, ChatWidgetComponent, CartButtonComponent, SettingsButtonComponent]
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons, IonModal, IonInput, CommonModule, FormsModule, CurrencyPipe, ChatWidgetComponent, CartButtonComponent, SettingsButtonComponent, AddressDisplayComponent]
 })
-export class HomePage {
-  preview = '';
-  
+export class HomePage implements OnInit {
   featuredPizzas: FeaturedPizza[] = [
     {
       id: 'ultimate-pepperoni',
@@ -101,9 +101,49 @@ export class HomePage {
     private router: Router
   ) {
     addIcons({
-      'checkmark-circle-outline': checkmarkCircleOutline,
-      'alert-circle-outline': alertCircleOutline,
+      'bag-outline': bagOutline,
+      'car-outline': carOutline,
     });
+  }
+
+  deliveryType: 'carry' | 'delivery' | null = null;
+  isAddressModalOpen = false;
+  selectedDeliveryType: 'carry' | 'delivery' | null = null;
+  addressForm = {
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    apt: '',
+    instructions: ''
+  };
+
+  ngOnInit() {
+    this.loadDeliveryType();
+    this.loadAddress();
+  }
+
+  loadDeliveryType() {
+    this.deliveryType = this.cartService.getDeliveryType();
+  }
+
+  loadAddress() {
+    const savedAddress = this.cartService.getAddress();
+    if (savedAddress) {
+      this.addressForm = {
+        street: savedAddress.street || '',
+        city: savedAddress.city || '',
+        state: savedAddress.state || '',
+        zipCode: savedAddress.zipCode || '',
+        apt: savedAddress.apt || '',
+        instructions: savedAddress.instructions || ''
+      };
+    }
+  }
+
+  saveDeliveryType(type: 'carry' | 'delivery') {
+    this.cartService.setDeliveryType(type);
+    this.deliveryType = type;
   }
 
   viewPizza(pizza: FeaturedPizza) {
@@ -125,48 +165,61 @@ export class HomePage {
     this.showToast(`${pizza.name} added to cart`);
   }
 
-  async sendHelp() {
-    const loading = await this.loadingCtrl.create({
-      message: 'Placing emergency order...',
-    });
-    await loading.present();
+  selectCarry() {
+    this.selectedDeliveryType = 'carry';
+    this.isAddressModalOpen = true;
+  }
 
-    try {
-      this.preview = 'I need help. Please call me.';
-      const result = await this.svc.broadcastToContacts(0);
-      await loading.dismiss();
-      
-      if (result.success) {
-        this.showToast(`Emergency order placed! Contacting ${result.sentTo} contact(s).`);
-      } else {
-        this.showToast(result.message || 'Failed to place order. Please try again.');
-      }
-    } catch (error) {
-      await loading.dismiss();
-      this.showToast('Failed to place order. Please try again.');
+  selectDelivery() {
+    this.selectedDeliveryType = 'delivery';
+    this.isAddressModalOpen = true;
+  }
+
+  closeAddressModal() {
+    this.isAddressModalOpen = false;
+    // Reset form if cancelled
+    if (!this.deliveryType) {
+      this.addressForm = {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        apt: '',
+        instructions: ''
+      };
     }
   }
 
-  async sendOk() {
-    const loading = await this.loadingCtrl.create({
-      message: 'Placing quick order...',
-    });
-    await loading.present();
+  isAddressFormValid(): boolean {
+    return !!(
+      this.addressForm.street?.trim() &&
+      this.addressForm.city?.trim() &&
+      this.addressForm.state?.trim() &&
+      this.addressForm.zipCode?.trim()
+    );
+  }
 
-    try {
-      this.preview = 'I am okay. No help needed.';
-      const result = await this.svc.broadcastToContacts(1);
-      await loading.dismiss();
-      
-      if (result.success) {
-        this.showToast(`Quick order sent to ${result.sentTo} contact(s)!`);
-      } else {
-        this.showToast(result.message || 'Failed to place order. Please try again.');
-      }
-    } catch (error) {
-      await loading.dismiss();
-      this.showToast('Failed to place order. Please try again.');
+  continueToOrder() {
+    if (!this.isAddressFormValid()) {
+      this.showToast('Please fill in all required fields');
+      return;
     }
+
+    if (!this.selectedDeliveryType) {
+      this.showToast('Please select a delivery type');
+      return;
+    }
+
+    // Save delivery type and address
+    this.saveDeliveryType(this.selectedDeliveryType);
+    this.cartService.setAddress(this.addressForm);
+
+    // Close modal and navigate to order page
+    this.isAddressModalOpen = false;
+    this.router.navigate(['/tabs/order']);
+    
+    const typeText = this.selectedDeliveryType === 'carry' ? 'Carry-out' : 'Delivery';
+    this.showToast(`${typeText} address saved!`);
   }
 
   addDealToCart(deal: Deal) {

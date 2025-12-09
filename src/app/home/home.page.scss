@@ -70,19 +70,26 @@
   .quick-order-card {
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
     cursor: pointer;
     text-align: center;
     padding: 16px;
     height: 100%;
+    border: 2px solid transparent;
+    background: #fff;
 
     &:active {
       transform: scale(0.98);
     }
 
-    &.emergency {
-      background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+    &.selected {
       border: 2px solid #e31837;
+      box-shadow: 0 12px 30px rgba(227, 24, 55, 0.25);
+      background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+    }
+
+    &.delivery {
+      // Keep delivery card styling distinct
     }
 
     .quick-order-icon {
@@ -291,6 +298,41 @@
         line-height: 1.5;
       }
     }
+  }
+}
+
+// Address Modal Styles
+ion-modal {
+  --width: 90%;
+  --max-width: 500px;
+  --border-radius: 20px;
+
+  ion-card {
+    margin: 0;
+    box-shadow: none;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 16px;
+  }
+
+  ion-label[position="stacked"] {
+    font-weight: 600;
+    color: #1d1d1d;
+    margin-bottom: 8px;
+  }
+
+  ion-input,
+  ion-textarea {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 8px;
   }
 }
 

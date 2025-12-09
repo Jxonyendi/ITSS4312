@@ -35,6 +35,7 @@ import {
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
 import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../components/address-display/address-display.component';
 
 interface SpecialtyPizza {
   id: string;
@@ -45,9 +46,7 @@ interface SpecialtyPizza {
   price: number;
   image: string;
   tag?: string;
-  tagPosition?: 'left' | 'right';
 }
-
 
 @Component({
   selector: 'app-order',
@@ -74,12 +73,22 @@ interface SpecialtyPizza {
     IonNote,
     IonIcon,
     IonButtons,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonChip,
     CommonModule,
     FormsModule,
     CurrencyPipe,
     ChatWidgetComponent,
     CartButtonComponent,
     SettingsButtonComponent,
+    AddressDisplayComponent,
   ],
 })
 export class OrderPage {
@@ -93,16 +102,6 @@ export class OrderPage {
       price: 14.99,
       image: 'assets/images/pizza/ultimate-pepperoni.jpg',
       tag: 'Fan Favorite',
-      tagPosition: 'left',
-    },
-    {
-      id: 'extravaganza',
-      name: 'ExtravaganZZa',
-      description: 'Premium pepperoni, ham, Italian sausage, beef, onions & peppers.',
-      crust: 'Crunchy Thin',
-      calories: 340,
-      price: 16.79,
-      image: 'assets/images/pizza/extravaganza.jpg',
     },
     {
       id: 'memphis-bbq',
@@ -113,7 +112,16 @@ export class OrderPage {
       price: 15.49,
       image: 'assets/images/pizza/memphis-bbq.jpg',
       tag: 'Limited Time',
-      tagPosition: 'right',
+    },
+    {
+      id: 'extravaganza',
+      name: 'ExtravaganZZa',
+      description: 'Premium pepperoni, ham, Italian sausage, beef, onions & peppers.',
+      crust: 'Crunchy Thin',
+      calories: 340,
+      price: 16.79,
+      image: 'assets/images/pizza/extravaganza.jpg',
+      tag: 'Exclusive',
     },
     {
       id: 'pacific-veggie',
@@ -143,6 +151,7 @@ export class OrderPage {
       image: 'assets/images/pizza/deluxe.jpg',
     },
   ];
+
   constructor(
     private svc: EmergencyService,
     private cartService: CartService,
@@ -155,13 +164,22 @@ export class OrderPage {
     });
   }
 
-  /**
-   * Quick-add a pizza to cart.
-   * We accept the DOM event to stop propagation so card click (select) doesn't also fire.
-   */
-  async addToOrders(pizza: SpecialtyPizza, event?: Event) {
+  async showToast(msg:string) {
+    const t = await this.toast.create({message: msg, duration: 2000});
+    t.present();
+  }
+
+  openBuildPizzaModal() {
+    this.router.navigate(['/tabs/order/build-pizza']);
+  }
+
+  viewPizza(pizza: SpecialtyPizza) {
+    // Optional: Could navigate to a detail page or do nothing
+  }
+
+  async addToCart(pizza: SpecialtyPizza, event?: Event) {
     if (event) {
-      event.stopPropagation();
+      event.stopPropagation(); // Prevent card click from firing
     }
     this.cartService.addToCart({
       pizzaId: pizza.id,
@@ -171,16 +189,6 @@ export class OrderPage {
       note: ''
     });
     this.showToast(`${pizza.name} added to cart`);
-  }
-
-
-  async showToast(msg:string) {
-    const t = await this.toast.create({message: msg, duration: 2000});
-    t.present();
-  }
-
-  openBuildPizzaModal() {
-    this.router.navigate(['/tabs/order/build-pizza']);
   }
 }
 

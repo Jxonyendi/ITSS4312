@@ -23,6 +23,7 @@ export interface CartItem {
 })
 export class CartService {
   private readonly CART_STORAGE_KEY = 'pizza_time_cart';
+  private readonly DELIVERY_TYPE_KEY = 'pizza_time_delivery_type';
   private cartItems$ = new BehaviorSubject<CartItem[]>([]);
 
   constructor() {
@@ -193,6 +194,72 @@ export class CartService {
   clearCart(): void {
     this.cartItems$.next([]);
     localStorage.removeItem(this.CART_STORAGE_KEY);
+  }
+
+  /**
+   * Get delivery type preference
+   */
+  getDeliveryType(): 'carry' | 'delivery' | null {
+    try {
+      const saved = localStorage.getItem(this.DELIVERY_TYPE_KEY);
+      if (saved === 'carry' || saved === 'delivery') {
+        return saved;
+      }
+    } catch (error) {
+      console.error('Failed to load delivery type:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Set delivery type preference
+   */
+  setDeliveryType(type: 'carry' | 'delivery'): void {
+    try {
+      localStorage.setItem(this.DELIVERY_TYPE_KEY, type);
+    } catch (error) {
+      console.error('Failed to save delivery type:', error);
+    }
+  }
+
+  /**
+   * Get saved address
+   */
+  getAddress(): {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    apt?: string;
+    instructions?: string;
+  } | null {
+    try {
+      const saved = localStorage.getItem('pizza_time_address');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error('Failed to load address:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Set saved address
+   */
+  setAddress(address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    apt?: string;
+    instructions?: string;
+  }): void {
+    try {
+      localStorage.setItem('pizza_time_address', JSON.stringify(address));
+    } catch (error) {
+      console.error('Failed to save address:', error);
+    }
   }
 }
 

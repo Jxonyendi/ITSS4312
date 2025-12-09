@@ -185,6 +185,10 @@ export class CheckoutComponent {
       // Get special instructions from form
       const specialInstructions = this.paymentForm.get('specialInstructions')?.value || '';
       
+      // Get address and delivery type from cart service
+      const address = this.cartService.getAddress();
+      const deliveryType = this.cartService.getDeliveryType();
+
       // Convert cart items to orders
       for (const item of this.cartItems) {
         for (let i = 0; i < item.quantity; i++) {
@@ -199,6 +203,8 @@ export class CheckoutComponent {
             pizzaImage: item.pizzaImage,
             pizzaPrice: item.pizzaPrice,
             note: combinedNote || undefined,
+            deliveryType: deliveryType || undefined,
+            address: address || undefined,
           });
         }
       }

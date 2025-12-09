@@ -37,6 +37,7 @@ import {
 } from 'ionicons/icons';
 import { CartButtonComponent } from '../../components/cart-button/cart-button.component';
 import { SettingsButtonComponent } from '../../components/settings-button/settings-button.component';
+import { AddressDisplayComponent } from '../../components/address-display/address-display.component';
 
 interface PizzaOption {
   id: string;
@@ -78,6 +79,7 @@ interface PizzaCustomization {
     CurrencyPipe,
     CartButtonComponent,
     SettingsButtonComponent,
+    AddressDisplayComponent,
   ],
 })
 export class BuildPizzaPage {
