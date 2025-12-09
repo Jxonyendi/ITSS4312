@@ -1,0 +1,204 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<<<<<<< HEAD
+<ion-content>
+
+  <!-- PUBLIC PERSONAL INFO -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Personal Information</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Name</ion-label>
+        <ion-text>{{ user.name }}</ion-text>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Address</ion-label>
+        <ion-text>{{ user.address }}</ion-text>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Phone</ion-label>
+        <ion-text>{{ user.phone }}</ion-text>
+      </ion-item>
+
+      <ion-item-divider>Emergency Contacts</ion-item-divider>
+
+      <ion-item *ngFor="let c of user.emergencyContacts">
+        <ion-label>{{ c.name }}</ion-label>
+        <ion-text>{{ c.phone }}</ion-text>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- LOCKED SECTION -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Payment Settings 🔒</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <!-- LOCK SCREEN -->
+      <div *ngIf="!isUnlocked">
+        <ion-item>
+          <ion-label position="stacked">Enter PIN</ion-label>
+          <ion-input
+            type="password"
+            [(ngModel)]="pinInput"
+            placeholder="••••">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" color="dark" (click)="unlock()">
+          Unlock
+        </ion-button>
+      </div>
+
+      <!-- UNLOCKED CONTENT -->
+      <div *ngIf="isUnlocked">
+
+        <ion-list>
+          <ion-item *ngFor="let code of pizzaCodes">
+            <ion-label>
+              <h2>{{ code.topping }}</h2>
+              <p>{{ code.meaning }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-button expand="block" color="medium" (click)="lock()">
+          Lock
+        </ion-button>
+
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+
+=======
+<ion-content class="account-content ion-padding">
+  <section class="hero">
+    <p class="eyebrow">Account Management</p>
+    <h1>Welcome, {{ currentUser?.username || 'User' }}!</h1>
+    <p class="supporting">
+      Manage your profile, trusted contacts, and emergency settings. Keep your information up to date for your safety.
+    </p>
+    <div class="hero-chips">
+      <ion-chip color="light">Secure & Private</ion-chip>
+      <ion-chip color="light">Trusted Contacts</ion-chip>
+  </div>
+  </section>
+
+  <section class="account-sections">
+    <h2 class="section-title">Trusted Contacts</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngFor="let c of contacts">
+          <ion-card class="contact-card">
+            <ion-card-header>
+              <ion-card-title>{{ c.name }}</ion-card-title>
+              <ion-card-subtitle>{{ c.phone }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="contact-actions">
+                <ion-button fill="outline" size="small" color="primary" (click)="edit(c)">
+                  Edit
+                </ion-button>
+                <ion-button fill="outline" size="small" color="danger" (click)="remove(c.id)">
+                  Remove
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-card class="add-contact-card">
+    <ion-card-header>
+      <ion-card-title>{{ editingContact ? 'Edit Contact' : 'Add New Contact' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="contactForm">
+        <ion-item [class.ion-invalid]="name?.invalid && name?.touched">
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input
+            formControlName="name"
+            placeholder="Enter contact name (2-50 chars)"
+          ></ion-input>
+          <ion-note slot="error" *ngIf="name?.invalid && name?.touched">
+            {{ getNameErrorMessage() }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="phone?.invalid && phone?.touched">
+          <ion-label position="stacked">Phone Number</ion-label>
+          <ion-input
+            formControlName="phone"
+            type="tel"
+            placeholder="Enter phone (e.g., 123-456-7890)"
+          ></ion-input>
+          <ion-note slot="error" *ngIf="phone?.invalid && phone?.touched">
+            {{ getPhoneErrorMessage() }}
+          </ion-note>
+        </ion-item>
+
+        <div class="form-actions">
+          <ion-button
+            expand="block"
+            (click)="editingContact ? update() : add()"
+            [disabled]="contactForm.invalid"
+          >
+            {{ editingContact ? 'Update Contact' : 'Add Contact' }}
+          </ion-button>
+          <ion-button
+            *ngIf="editingContact"
+            expand="block"
+            fill="outline"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  </section>
+
+  <section class="messages-section">
+    <h2 class="section-title">Prewritten Messages</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngFor="let m of messages; let i = index">
+          <ion-card class="message-card">
+            <ion-card-content>
+              <p class="message-text">{{ m }}</p>
+              <ion-button expand="block" fill="outline" size="small" (click)="sendPreview(i)">
+                Send Preview
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </section>
+
+  <section class="logout-section">
+    <ion-button expand="block" color="danger" size="large" (click)="logout()">
+      Logout
+    </ion-button>
+  </section>
+
+  <!-- Chat Widget -->
+  <app-chat-widget></app-chat-widget>
+>>>>>>> 3a4491c94732c62edb53cc3456644a62c6092b3f
+</ion-content>
