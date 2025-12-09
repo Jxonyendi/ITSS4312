@@ -299,7 +299,7 @@ export class AuthService {
 
       let shouldFallbackToLocal = !environment.useBackend;
 
-      // If backend is enabled, try it first; fallback to local on failure/404
+      // If backend is enabled, require backend delete to succeed (no silent fallback)
       if (environment.useBackend) {
         try {
           const response = await firstValueFrom(
@@ -314,14 +314,10 @@ export class AuthService {
             this.router.navigate(['/login']);
             return { success: true, message: 'Account deleted successfully' };
           } else {
-            // Backend responded but failed (e.g., 404). Fallback to local delete.
-            console.warn('Backend delete-account failed, falling back to local delete:', response.message);
-            shouldFallbackToLocal = true;
+            return { success: false, message: response.message || 'Failed to delete account. Please verify your password.' };
           }
         } catch (error: any) {
-          // Backend endpoint missing or not reachable; fallback to local
-          console.warn('Backend delete-account error, falling back to local delete:', error?.message || error);
-          shouldFallbackToLocal = true;
+          return { success: false, message: error?.message || 'Failed to delete account. Please verify your password.' };
         }
       }
 
@@ -349,13 +345,6 @@ export class AuthService {
         this.currentUser$.next(null);
         localStorage.removeItem(this.SESSION_KEY);
         this.apiService.clearAuthToken();
-        
-        // If backend is enabled but endpoint failed, warn user
-        if (environment.useBackend) {
-          console.warn('Backend delete endpoint not available. Account may still exist on server.');
-          this.router.navigate(['/login']);
-          return { success: true, message: 'Local session cleared. Note: Account may still exist on server if backend endpoint is not available.' };
-        }
         
         this.router.navigate(['/login']);
         return { success: true, message: 'Account deleted successfully' };
