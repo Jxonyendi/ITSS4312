@@ -1,0 +1,135 @@
+<div class="checkout-container">
+  <!-- Order Summary -->
+  <ion-card class="order-summary-card">
+    <ion-card-header>
+      <ion-card-title>Order Summary</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="summary-items">
+        <div *ngFor="let item of cartItems" class="summary-item">
+          <span class="item-name">{{ item.pizzaName }} x{{ item.quantity }}</span>
+          <span class="item-price">{{ (item.pizzaPrice * item.quantity) | currency: 'USD' }}</span>
+        </div>
+      </div>
+      <div class="summary-total">
+        <span class="total-label">Total:</span>
+        <span class="total-value">{{ total | currency: 'USD' }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Payment Form -->
+  <ion-card class="payment-card">
+    <ion-card-header>
+      <ion-card-title>Payment Information</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="paymentForm" (ngSubmit)="processPayment()">
+        <!-- Card Number -->
+        <ion-item class="form-item" [class.error]="cardNumber?.invalid && cardNumber?.touched && cardNumber?.dirty">
+          <ion-label position="stacked">
+            Card Number <span class="required">*</span>
+          </ion-label>
+          <ion-input
+            formControlName="cardNumber"
+            type="text"
+            placeholder="1234 5678 9012 3456"
+            maxlength="19"
+            (ionInput)="formatCardNumber($event)"
+            (ionBlur)="cardNumber?.markAsTouched()"
+          ></ion-input>
+        </ion-item>
+        <ion-note *ngIf="cardNumber?.invalid && cardNumber?.touched && cardNumber?.dirty" color="danger" class="error-note">
+          <span *ngIf="cardNumber?.errors?.['required']">Card number is required</span>
+          <span *ngIf="cardNumber?.errors?.['invalidCard']">Invalid card number</span>
+          <span *ngIf="cardNumber?.errors?.['invalidLength']">Card number must be 16 digits</span>
+        </ion-note>
+
+        <!-- Expiry Date and CVV -->
+        <div class="form-row">
+          <ion-item class="form-item" [class.error]="expiryDate?.invalid && expiryDate?.touched">
+            <ion-label position="stacked">
+              Expiry Date <span class="required">*</span>
+            </ion-label>
+            <ion-input
+              formControlName="expiryDate"
+              type="text"
+              placeholder="MM/YY"
+              maxlength="5"
+              (ionInput)="formatExpiryDate($event)"
+            ></ion-input>
+          </ion-item>
+          <ion-item class="form-item" [class.error]="cvv?.invalid && cvv?.touched">
+            <ion-label position="stacked">
+              CVV <span class="required">*</span>
+            </ion-label>
+            <ion-input
+              formControlName="cvv"
+              type="text"
+              placeholder="123"
+              maxlength="3"
+              (ionInput)="formatCVV($event)"
+            ></ion-input>
+          </ion-item>
+        </div>
+        <ion-note *ngIf="expiryDate?.invalid && expiryDate?.touched" color="danger" class="error-note">
+          Invalid expiry date (MM/YY)
+        </ion-note>
+        <ion-note *ngIf="cvv?.invalid && cvv?.touched" color="danger" class="error-note">
+          CVV must be 3 digits
+        </ion-note>
+
+        <!-- Cardholder Name -->
+        <ion-item class="form-item" [class.error]="cardholderName?.invalid && cardholderName?.touched">
+          <ion-label position="stacked">
+            Cardholder Name <span class="required">*</span>
+          </ion-label>
+          <ion-input
+            formControlName="cardholderName"
+            type="text"
+            placeholder="John Doe"
+            maxlength="50"
+          ></ion-input>
+        </ion-item>
+        <ion-note *ngIf="cardholderName?.invalid && cardholderName?.touched" color="danger" class="error-note">
+          Cardholder name is required
+        </ion-note>
+
+        <!-- Billing Address (Optional) -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Billing Address (Optional)</ion-label>
+          <ion-input
+            formControlName="billingAddress"
+            type="text"
+            placeholder="123 Main St, City, State ZIP"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="goBack()"
+            [disabled]="isProcessing"
+            class="back-btn"
+          >
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+            Back to Cart
+          </ion-button>
+          <ion-button
+            expand="block"
+            size="large"
+            type="submit"
+            [disabled]="isProcessing"
+            class="pay-btn"
+          >
+            <ion-icon name="card-outline" slot="start"></ion-icon>
+            {{ isProcessing ? 'Processing...' : 'Pay Now' }}
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</div>
+

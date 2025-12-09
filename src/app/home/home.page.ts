@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { CurrencyPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 
 interface FeaturedPizza {
   id: string;
@@ -34,7 +35,7 @@ interface Deal {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, CommonModule, CurrencyPipe, ChatWidgetComponent]
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonTextarea, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonChip, IonIcon, IonButtons, CommonModule, CurrencyPipe, ChatWidgetComponent, CartButtonComponent]
 })
 export class HomePage {
   preview = '';

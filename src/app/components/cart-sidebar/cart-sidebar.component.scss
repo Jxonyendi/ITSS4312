@@ -1,0 +1,248 @@
+:host {
+  ion-modal {
+    --width: 100%;
+    --max-width: 500px;
+    --height: 100%;
+    --border-radius: 0;
+  }
+}
+
+.cart-content {
+  --background: #f8f9fa;
+}
+
+.cart-items-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1d1d1d;
+    margin: 0 0 8px;
+  }
+
+  p {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.items-list {
+  margin-bottom: 24px;
+}
+
+.cart-item-card {
+  margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  .item-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .item-thumbnail {
+      --size: 80px;
+      --border-radius: 12px;
+      flex-shrink: 0;
+
+      img {
+        object-fit: cover;
+        border-radius: 12px;
+      }
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+
+      .item-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1d1d1d;
+        margin: 0 0 4px;
+      }
+
+      .item-customization {
+        font-size: 0.85rem;
+        color: #666;
+        margin: 0 0 4px;
+        line-height: 1.4;
+      }
+
+      .item-note {
+        font-size: 0.8rem;
+        color: #999;
+        margin: 0;
+        font-style: italic;
+      }
+    }
+  }
+
+  .item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .quantity-btn {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --min-height: 32px;
+        margin: 0;
+      }
+
+      .quantity-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1d1d1d;
+        min-width: 24px;
+        text-align: center;
+      }
+    }
+
+    .item-price {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+
+      .price-label {
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .price-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #e31837;
+      }
+    }
+
+    .remove-btn {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      margin: 0;
+    }
+  }
+}
+
+.cart-summary {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+
+    .summary-label {
+      font-size: 0.95rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-size: 1rem;
+      color: #1d1d1d;
+      font-weight: 600;
+    }
+
+    &.total-row {
+      border-top: 2px solid #f0f0f0;
+      padding-top: 16px;
+      margin-top: 8px;
+
+      .summary-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1d1d1d;
+      }
+
+      .summary-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e31837;
+      }
+    }
+  }
+}
+
+.checkout-section {
+  padding: 0 0 24px;
+
+  .checkout-btn {
+    --background: linear-gradient(135deg, #e31837, #c1121f);
+    --background-activated: #c1121f;
+    --color: #fff;
+    --border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    height: 56px;
+    box-shadow: 0 4px 16px rgba(227, 24, 55, 0.3);
+
+    ion-icon {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .cart-items-container {
+    padding: 12px;
+  }
+
+  .cart-item-card {
+    .item-header {
+      .item-thumbnail {
+        --size: 60px;
+      }
+
+      .item-info {
+        .item-name {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+

@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonItem, IonLabel, IonThumbnail, IonChip } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonItem, IonLabel, IonThumbnail, IonChip, IonButtons } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { EmergencyService, Order } from '../services/emergency.services';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 
 @Component({
   selector: 'app-tracker',
@@ -25,8 +26,10 @@ import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.compo
       IonLabel,
       IonThumbnail,
     IonChip,
+    IonButtons,
     CommonModule,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    CartButtonComponent
   ],
   standalone: true
 })

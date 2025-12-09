@@ -4,11 +4,12 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { isPlatform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
+import { CartSidebarComponent } from './components/cart-sidebar/cart-sidebar.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
+  imports: [IonApp, IonRouterOutlet, CartSidebarComponent],
 })
 export class AppComponent implements OnInit {
   constructor(

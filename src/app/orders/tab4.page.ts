@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EmergencyService } from '../services/emergency.services';
+import { CartService } from '../services/cart.service';
 import { ToastController } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import {
@@ -22,6 +23,7 @@ import {
   IonTextarea,
   IonNote,
   IonIcon,
+  IonButtons,
 } from '@ionic/angular/standalone';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +33,7 @@ import {
   constructOutline,
 } from 'ionicons/icons';
 import { ChatWidgetComponent } from '../components/chat-widget/chat-widget.component';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 
 interface SpecialtyPizza {
   id: string;
@@ -69,10 +72,12 @@ interface SpecialtyPizza {
     IonTextarea,
     IonNote,
     IonIcon,
+    IonButtons,
     CommonModule,
     FormsModule,
     CurrencyPipe,
     ChatWidgetComponent,
+    CartButtonComponent,
   ],
 })
 export class OrderPage {
@@ -143,7 +148,8 @@ export class OrderPage {
   lastOrder: any = null;
 
   constructor(
-    private svc: EmergencyService, 
+    private svc: EmergencyService,
+    private cartService: CartService,
     private toast: ToastController, 
     private router: Router
   ) {
@@ -172,23 +178,21 @@ export class OrderPage {
   }
 
   /**
-   * Quick-add a pizza directly to orders and open the tracker.
+   * Quick-add a pizza to cart.
    * We accept the DOM event to stop propagation so card click (select) doesn't also fire.
    */
   async addToOrders(pizza: SpecialtyPizza, event?: Event) {
     if (event) {
       event.stopPropagation();
     }
-    const payload = {
+    this.cartService.addToCart({
       pizzaId: pizza.id,
       pizzaName: pizza.name,
       pizzaImage: pizza.image,
       pizzaPrice: pizza.price,
       note: ''
-    };
-    await this.svc.placePizzaOrder(payload);
-    this.showToast(`${pizza.name} added to orders. Opening tracker...`);
-    this.router.navigate(['/tabs/tracker']);
+    });
+    this.showToast(`${pizza.name} added to cart`);
   }
 
   async placeOrder() {
@@ -203,19 +207,16 @@ export class OrderPage {
       return;
     }
     
-    // Place a pizza order with metadata so it appears in the tracker
-    const payload = {
+    // Add pizza to cart
+    this.cartService.addToCart({
       pizzaId: this.selectedPizza.id,
       pizzaName: this.selectedPizza.name,
       pizzaImage: this.selectedPizza.image,
       pizzaPrice: this.selectedPizza.price,
       note: (this.note || '').trim()
-    };
-    await this.svc.placePizzaOrder(payload);
-    this.showToast(`${this.selectedPizza.name} added to orders. Opening tracker...`);
+    });
+    this.showToast(`${this.selectedPizza.name} added to cart`);
     this.note = '';
-    // Navigate to tracker tab so user can see the order
-    this.router.navigate(['/tabs/tracker']);
   }
 
   async showToast(msg:string) {

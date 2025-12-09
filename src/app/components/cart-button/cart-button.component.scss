@@ -1,0 +1,31 @@
+.cart-button {
+  position: relative;
+  --padding-start: 8px;
+  --padding-end: 12px;
+  margin: 0;
+  font-weight: 600;
+  --color: #e31837;
+  color: #e31837;
+  
+  ion-icon {
+    font-size: 1.4rem;
+    color: #e31837;
+    margin-right: 4px;
+  }
+}
+
+.cart-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+

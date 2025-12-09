@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EmergencyService } from '../../services/emergency.services';
+import { CartService } from '../../services/cart.service';
 import { ToastController } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import {
@@ -12,10 +13,13 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonChip,
   IonIcon,
   IonButtons,
   IonBackButton,
+  IonItem,
+  IonLabel,
+  IonSelect,
+  IonSelectOption,
 } from '@ionic/angular/standalone';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +35,7 @@ import {
   starOutline,
   arrowBackOutline
 } from 'ionicons/icons';
+import { CartButtonComponent } from '../../components/cart-button/cart-button.component';
 
 interface PizzaOption {
   id: string;
@@ -60,13 +65,17 @@ interface PizzaCustomization {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonChip,
     IonIcon,
     IonButtons,
     IonBackButton,
+    IonItem,
+    IonLabel,
+    IonSelect,
+    IonSelectOption,
     CommonModule,
     FormsModule,
     CurrencyPipe,
+    CartButtonComponent,
   ],
 })
 export class BuildPizzaPage {
@@ -134,6 +143,7 @@ export class BuildPizzaPage {
 
   constructor(
     private svc: EmergencyService,
+    private cartService: CartService,
     private toast: ToastController,
     private router: Router
   ) {
@@ -161,7 +171,7 @@ export class BuildPizzaPage {
     let total = this.getBasePrice();
     
     // Add topping prices
-    const allToppings = [...this.meatToppings, ...this.veggieToppings, ...this.premiumToppings];
+    const allToppings = this.getAllToppings();
     this.selectedToppings.forEach(toppingId => {
       const topping = allToppings.find(t => t.id === toppingId);
       if (topping?.price) {
@@ -172,24 +182,15 @@ export class BuildPizzaPage {
     return total;
   }
 
-  // Toggle topping selection
-  toggleTopping(toppingId: string) {
-    const index = this.selectedToppings.indexOf(toppingId);
-    if (index > -1) {
-      this.selectedToppings.splice(index, 1);
-    } else {
-      this.selectedToppings.push(toppingId);
-    }
-  }
 
-  // Check if topping is selected
-  isToppingSelected(toppingId: string): boolean {
-    return this.selectedToppings.includes(toppingId);
+  // Get all toppings combined
+  getAllToppings(): PizzaOption[] {
+    return [...this.meatToppings, ...this.veggieToppings, ...this.premiumToppings];
   }
 
   // Get topping name by ID
   getToppingName(toppingId: string): string {
-    const allToppings = [...this.meatToppings, ...this.veggieToppings, ...this.premiumToppings];
+    const allToppings = this.getAllToppings();
     return allToppings.find(t => t.id === toppingId)?.name || toppingId;
   }
 
@@ -218,11 +219,11 @@ export class BuildPizzaPage {
     return this.cheeses.find(c => c.id === this.selectedCheese)?.name || '';
   }
 
-  // Add custom pizza to order
+  // Add custom pizza to cart
   async addCustomPizzaToOrder() {
-    const customization: PizzaCustomization = {
-      crust: this.crusts.find(c => c.id === this.selectedCrust)?.name || this.selectedCrust,
+    const customization = {
       size: this.sizes.find(s => s.id === this.selectedSize)?.name || this.selectedSize,
+      crust: this.crusts.find(c => c.id === this.selectedCrust)?.name || this.selectedCrust,
       sauce: this.sauces.find(s => s.id === this.selectedSauce)?.name || this.selectedSauce,
       cheese: this.cheeses.find(c => c.id === this.selectedCheese)?.name || this.selectedCheese,
       toppings: this.selectedToppings.map(id => this.getToppingName(id)),
@@ -231,18 +232,16 @@ export class BuildPizzaPage {
     // Format customization details for display
     const customizationNote = `Custom Pizza: ${customization.size}, ${customization.crust}, ${customization.sauce}, ${customization.cheese}${customization.toppings.length > 0 ? ', Toppings: ' + customization.toppings.join(', ') : ''}`;
 
-    const pizzaData = {
+    this.cartService.addToCart({
       pizzaId: 'custom',
       pizzaName: 'Custom Pizza',
       pizzaImage: 'assets/images/pizza/deluxe.jpg',
       pizzaPrice: this.getTotalPrice(),
       customization: customization,
       note: customizationNote,
-    };
+    });
 
-    await this.svc.placePizzaOrder(pizzaData);
-    this.showToast('Custom pizza added to orders. Opening tracker...');
-    this.router.navigate(['/tabs/tracker']);
+    this.showToast('Custom pizza added to cart');
   }
 
   async showToast(msg: string) {

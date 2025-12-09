@@ -48,6 +48,7 @@ import {
   closeOutline,
   sendOutline,
 } from 'ionicons/icons';
+import { CartButtonComponent } from '../components/cart-button/cart-button.component';
 
 interface SupportOption {
   id: string;
@@ -118,6 +119,7 @@ interface SupportRequest {
     CommonModule,
     FormsModule,
     ChatWidgetComponent,
+    CartButtonComponent,
   ],
 })
 export class ContactUsPage {
