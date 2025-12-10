@@ -15,6 +15,9 @@ import { Router } from '@angular/router';
   imports: [IonButton, IonIcon, IonPopover, IonList, IonItem, IonLabel, IonButtons, IonContent, CommonModule]
 })
 export class SettingsButtonComponent {
+  // Generate unique ID for each component instance to avoid conflicts
+  public triggerId = `settings-trigger-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
   constructor(
     private authService: AuthService,
     private toast: ToastController,

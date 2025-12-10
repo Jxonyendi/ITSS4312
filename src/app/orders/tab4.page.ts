@@ -171,7 +171,7 @@ export class OrderPage {
 
   openBuildPizzaModal() {
     this.router.navigate(['/tabs/order/build-pizza']);
-  }
+      }
 
   viewPizza(pizza: SpecialtyPizza) {
     // Optional: Could navigate to a detail page or do nothing

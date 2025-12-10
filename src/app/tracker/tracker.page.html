@@ -55,14 +55,14 @@
               class="view-button">
               View Order
             </ion-button>
-            <ion-button 
+          <ion-button 
               *ngIf="canCancel(order)"
-              expand="block" 
-              color="danger" 
+            expand="block" 
+            color="danger" 
               (click)="cancelOrder(order)"
-              class="cancel-button">
-              Cancel Order
-            </ion-button>
+            class="cancel-button">
+            Cancel Order
+          </ion-button>
           </div>
         </ion-card-content>
       </ion-card>

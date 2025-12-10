@@ -168,8 +168,8 @@ export class EmergencyService {
       }
     }
 
-    // Fallback to localStorage
-    this.loadContactsFromStorage();
+        // Fallback to localStorage
+        this.loadContactsFromStorage();
   }
 
   private loadContactsFromStorage(): void {
@@ -309,10 +309,10 @@ export class EmergencyService {
       } catch (error) {
         console.error('Failed to load orders from API:', error);
       }
-    }
+      }
 
-    this.loadOrdersFromStorage();
-  }
+      this.loadOrdersFromStorage();
+    }
 
   private loadOrdersFromStorage(): void {
     try {
@@ -436,7 +436,7 @@ export class EmergencyService {
   async broadcastToContacts(type: number, extra?: string): Promise<any> {
     const message = (this.messages[type] || this.messages[0]) + (extra ? `\n${extra}` : '');
     const contacts = this.contacts$.value;
-
+    
     if (!contacts || contacts.length === 0) {
       return { success: false, message: 'No contacts saved' };
     }
@@ -536,9 +536,9 @@ export class EmergencyService {
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               (position) => resolve({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                  address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
                 accuracy: position.coords.accuracy
               }),
               () => resolve(this.getFallbackLocation())
@@ -614,17 +614,17 @@ export class EmergencyService {
    ============================ */
 
   private loadPizzaCodes(): void {
-    try {
+      try {
       const raw = localStorage.getItem(this.PIZZA_CODES_KEY);
       if (raw) {
         this.pizzaCodes = JSON.parse(raw);
-      } else {
+        } else {
         // ensure default persists if not present
         this.savePizzaCodes(this.pizzaCodes);
-      }
-    } catch (error) {
+        }
+      } catch (error) {
       console.error('Failed to load pizza codes from storage:', error);
-    }
+      }
   }
 
   getPizzaCodes(): PizzaCodeAction[] {
@@ -632,10 +632,10 @@ export class EmergencyService {
   }
 
   savePizzaCodes(codes: PizzaCodeAction[]): void {
-    try {
+      try {
       this.pizzaCodes = codes;
       localStorage.setItem(this.PIZZA_CODES_KEY, JSON.stringify(codes));
-    } catch (error) {
+      } catch (error) {
       console.error('Failed to save pizza codes:', error);
     }
   }
@@ -691,8 +691,8 @@ export class EmergencyService {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
           this.messages = parsed;
-        }
-      } else {
+      }
+    } else {
         // ensure defaults are available if not stored
         localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
       }
@@ -704,7 +704,7 @@ export class EmergencyService {
   addCustomMessage(text: string): void {
     if (!text || !text.trim()) return;
     this.messages.push(text.trim());
-    try {
+      try {
       localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
     } catch (err) {
       console.error('Failed to save custom message:', err);
@@ -714,7 +714,7 @@ export class EmergencyService {
   saveMessages(): void {
     try {
       localStorage.setItem(this.MESSAGES_STORAGE_KEY, JSON.stringify(this.messages));
-    } catch (error) {
+      } catch (error) {
       console.error('Failed to save messages:', error);
     }
   }
@@ -750,5 +750,5 @@ export class EmergencyService {
   // convenience wrapper if other code expects this name
   async broadcastToContactsWithIndex(index: number) {
     return this.broadcastToContacts(index);
+    }
   }
-}

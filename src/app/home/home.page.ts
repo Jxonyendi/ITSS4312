@@ -224,10 +224,10 @@ export class HomePage implements OnInit {
 
   addDealToCart(deal: Deal) {
     this.cartService.addToCart({
-      pizzaId: deal.id,
-      pizzaName: deal.name,
-      pizzaPrice: deal.price,
-      note: deal.description,
+        pizzaId: deal.id,
+        pizzaName: deal.name,
+        pizzaPrice: deal.price,
+        note: deal.description,
     });
     this.showToast(`${deal.name} added to cart`);
   }

@@ -41,7 +41,7 @@
           <ion-card class="pizza-card" (click)="viewPizza(pizza)">
             <ion-card-header>
               <div class="pizza-header-top">
-                <ion-card-title>{{ pizza.name }}</ion-card-title>
+              <ion-card-title>{{ pizza.name }}</ion-card-title>
                 <ion-chip *ngIf="pizza.tag" class="pizza-tag">{{ pizza.tag }}</ion-chip>
               </div>
               <ion-card-subtitle>{{ pizza.crust }} • {{ pizza.calories }} cal/slice</ion-card-subtitle>

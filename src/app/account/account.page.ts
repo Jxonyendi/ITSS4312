@@ -65,7 +65,7 @@ export class AccountPage implements OnInit {
     this.pizzaMappings = this.svc.getPizzaCodes();
 
     this.auth.currentUser.subscribe(u => this.currentUser = u);
-  }
+    }
 
   /* ======================
      🔐 PIN UNLOCK
@@ -78,7 +78,7 @@ export class AccountPage implements OnInit {
       this.showToast('Settings unlocked');
     } else {
       this.showToast('Invalid PIN');
-    }
+  }
   }
 
   /* ======================

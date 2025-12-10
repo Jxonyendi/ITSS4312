@@ -507,7 +507,7 @@ app.listen(PORT, () => {
   if (useMongoDB) {
     console.log('💾 Using MongoDB Atlas');
   } else {
-    console.log('💾 Using JSON file storage (no MongoDB required)');
-    console.log(`📁 Data stored in: ${__dirname}/data/`);
+  console.log('💾 Using JSON file storage (no MongoDB required)');
+  console.log(`📁 Data stored in: ${__dirname}/data/`);
   }
 });

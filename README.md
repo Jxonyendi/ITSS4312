@@ -8,51 +8,80 @@ A full-featured pizza ordering application built with Ionic and Angular, featuri
 
 ### Core Features
 - 🍕 **Pizza Ordering**: Browse specialty pizzas with beautiful images, select your favorite, and place orders
+- 🛒 **Shopping Cart**: Add multiple items, manage quantities, and checkout
+- 🔨 **Build Your Own Pizza**: Custom pizza builder with toppings and crust selection
 - 📍 **Real-time Tracking**: Track your pizza orders with live status updates
-- 🔐 **User Authentication**: Secure login and registration system with local database
+- 🔐 **User Authentication**: Secure login and registration system with backend API or localStorage
+- 💬 **AI Chat Support**: Google Gemini-powered chat widget for customer support
 - 📱 **Native Integrations**: 
   - Real geolocation using Capacitor
   - SMS capabilities (with plugin installation)
   - Uber deep linking for ride requests
 - 👥 **Contact Management**: Save trusted contacts for emergency messaging
+- ⚙️ **Settings Page**: Customize app preferences and notifications
 - 🎨 **Modern UI**: Domino's-inspired design with smooth animations
 
-### Pages (8+ total)
-1. **Login Page** - User authentication
-2. **Home Page** - Quick actions and overview
+### Pages (11 total)
+1. **Login Page** - User authentication and registration
+2. **Home Page** - Quick actions, featured pizzas, and deals
 3. **Orders Page** - Browse and order specialty pizzas
-4. **Tracker Page** - Track active orders
-5. **Account Page** - Manage profile and contacts
-6. **Contact Us Page** - Support and help
-7. **Tab 1, 2, 3** - Additional feature pages
+4. **Build Pizza Page** - Custom pizza builder
+5. **Tracker Page** - Track active orders in real-time
+6. **Order Details Page** - Detailed view of individual orders
+7. **Order History Page** - View past orders
+8. **Account Page** - Manage profile, contacts, and emergency settings
+9. **Settings Page** - App preferences and configuration
+10. **Contact Us Page** - Support, help, and AI chat widget
+11. **Checkout** - Shopping cart checkout process
 
 ## Technologies Used
 
 - **Framework**: Ionic 8 + Angular 20
 - **Language**: TypeScript
 - **State Management**: RxJS BehaviorSubjects
+- **Backend**: Node.js + Express with MongoDB Atlas or JSON file storage
+- **AI Integration**: Google Generative AI (Gemini) for chat support
 - **Native Plugins**: 
   - @capacitor/geolocation - Real device location
   - @capacitor/core - Native platform detection
-- **Storage**: localStorage (can be upgraded to IndexedDB or backend)
+  - @capacitor/haptics - Haptic feedback
+  - @capacitor/keyboard - Keyboard handling
+  - @byteowls/capacitor-sms - SMS messaging
+- **Storage**: Dual-mode (localStorage fallback + REST API with MongoDB)
 - **Routing**: Angular Router with auth guards
+- **Authentication**: JWT tokens with session management
 
 ## Project Structure
 
 ```
 src/app/
 ├── login/              # Login/Registration page
-├── home/               # Home page
+├── home/               # Home page with featured pizzas
 ├── orders/             # Pizza ordering page
+│   └── build-pizza/   # Custom pizza builder
 ├── tracker/            # Order tracking page
+├── order-details/      # Individual order details
+├── order-history/      # Past orders history
 ├── account/            # User account management
-├── contact-us/         # Support page
+├── settings/           # App settings and preferences
+├── contact-us/         # Support page with chat
 ├── services/           # Core services
-│   ├── auth.service.ts        # Authentication
+│   ├── auth.service.ts        # Authentication (JWT/localStorage)
+│   ├── api.service.ts         # REST API client
+│   ├── cart.service.ts        # Shopping cart management
+│   ├── chat.service.ts        # Gemini AI chat integration
 │   ├── emergency.services.ts  # SMS, location, orders
-│   └── database.service.ts    # Local storage management
+│   ├── database.service.ts    # Local storage management
+│   └── error-handler.service.ts # Error handling
 ├── guards/             # Route guards
 │   └── auth.guard.ts          # Authentication guard
+├── components/         # Reusable components
+│   ├── cart-button/          # Shopping cart icon button
+│   ├── cart-sidebar/         # Cart sidebar component
+│   ├── checkout/              # Checkout component
+│   ├── chat-widget/          # AI chat support widget
+│   ├── address-display/      # Address display component
+│   └── settings-button/       # Settings menu button
 └── shared/             # Shared components
     └── components/
         └── pizza-card/        # Reusable pizza card component (@Input)
@@ -150,53 +179,123 @@ npx cap open android
 - Browse 6+ specialty pizzas with images
 - Click to select a pizza
 - View details: crust type, calories, price
+- **Build Your Own Pizza**: Customize with toppings and crust
+- **Shopping Cart**: Add multiple items, adjust quantities
+- **Checkout**: Review order, select delivery type, add address
 - Add delivery notes
 - Quick-add button for fast ordering
 
 #### Order Tracking
 - View all active orders
 - See order status: placed → accepted → on the way → delivered
+- **Order Details Page**: Detailed view with full order information
+- **Order History**: View all past orders
 - Cancel orders (if not delivered)
-- View order history
+- Real-time status updates
 
 #### Emergency Features
 - **Location**: Get real device location (requires permissions)
 - **SMS**: Send messages to trusted contacts
 - **Uber Integration**: Deep link to Uber app for rides
+- **Pizza Code Mapping**: Map pizza toppings to emergency actions
+- **Prewritten Messages**: Save custom emergency messages
+
+#### AI Chat Support
+- **Gemini AI Integration**: Google Generative AI-powered chat widget
+- Available on multiple pages (Home, Orders, Tracker, Contact Us)
+- Context-aware responses about orders, menu, and support
+- Conversation history maintained during session
 
 ## Angular Best Practices Implemented
 
 ✅ **@Input() Decorators**: Used in `PizzaCardComponent` for data binding  
-✅ **Services**: `AuthService`, `EmergencyService`, `DatabaseService`  
-✅ **Shared Components**: Reusable pizza card component  
+✅ **Services**: `AuthService`, `ApiService`, `CartService`, `ChatService`, `EmergencyService`, `DatabaseService`, `ErrorHandlerService`  
+✅ **Shared Components**: Reusable pizza card, cart, chat widget, and more  
 ✅ **Route Guards**: Auth guard for protected routes  
 ✅ **Standalone Components**: Modern Angular architecture  
-✅ **RxJS Observables**: Reactive state management  
+✅ **RxJS Observables**: Reactive state management with BehaviorSubjects  
+✅ **Dual Storage Strategy**: Seamless switching between backend API and localStorage  
+✅ **AI Integration**: Google Gemini for intelligent chat support  
 
-## API Integration Notes
+## Backend API
 
 ### Current Implementation
-- **Authentication**: Local storage (can be upgraded to backend)
-- **Geolocation**: Real device location via Capacitor
-- **SMS**: Mock implementation (install `@capacitor-community/sms` for real SMS)
-- **Uber**: Deep linking (requires Uber app installed)
+The app includes a **complete Node.js + Express backend** with:
+- **Dual Storage**: Automatically switches between MongoDB Atlas and JSON file storage
+- **REST API**: Full CRUD operations for users, orders, and contacts
+- **JWT Authentication**: Secure token-based authentication
+- **Environment-based**: Configure via `.env` file
 
-### For Production Backend
-To connect to a Node.js/MongoDB backend:
+### Backend Setup
 
-1. Update `AuthService` to make HTTP calls
-2. Replace localStorage with API endpoints
-3. Add HTTP interceptors for authentication
-4. Implement proper error handling
+1. **Navigate to backend directory**
+   ```bash
+   cd backend
+   npm install
+   ```
 
-Example endpoint structure:
+2. **Configure environment** (create `backend/.env`):
+   ```env
+   # For MongoDB (optional - uses JSON files if not set)
+   MONGODB_URI=your-mongodb-connection-string
+   
+   # JWT Secret
+   JWT_SECRET=your-secret-key
+   
+   # Server Port
+   PORT=3000
+   
+   # Gemini API Key (for chat)
+   GEMINI_API_KEY=your-gemini-api-key
+   ```
+
+3. **Start backend server**
+   ```bash
+   node server.js
+   ```
+
+4. **Configure frontend** (update `src/environments/environment.ts`):
+   ```typescript
+   export const environment = {
+     production: false,
+     apiUrl: 'http://localhost:3000/api',
+     useBackend: true, // Set to false for localStorage-only mode
+   };
+   ```
+
+### API Endpoints
+
 ```
+# Authentication
 POST /api/auth/register
 POST /api/auth/login
-GET /api/orders
-POST /api/orders
-GET /api/user/contacts
+GET  /api/auth/me
+POST /api/auth/delete-account
+
+# Contacts
+GET    /api/contacts
+POST   /api/contacts
+PUT    /api/contacts/:id
+DELETE /api/contacts/:id
+
+# Orders
+GET    /api/orders
+POST   /api/orders
+GET    /api/orders/:id
+PUT    /api/orders/:id
+DELETE /api/orders/:id
+
+# Chat (Gemini AI)
+POST /api/chat/message
+
+# Contact Form
+POST /api/contact/send-email
 ```
+
+### Storage Modes
+- **MongoDB Mode**: Set `MONGODB_URI` in `.env` → Uses MongoDB Atlas
+- **JSON Mode**: No `MONGODB_URI` → Uses `backend/data/*.json` files
+- **Frontend Fallback**: Set `useBackend: false` → Uses localStorage only
 
 ## Screenshots
 
@@ -228,11 +327,11 @@ npm run build
 
 ### Core Requirements (9 points)
 - ✅ **20+ GitHub commits** - Track progress with regular commits
-- ✅ **6+ different pages** - 8 pages implemented
+- ✅ **6+ different pages** - 11 pages implemented (Login, Home, Orders, Build Pizza, Tracker, Order Details, Order History, Account, Settings, Contact Us, Checkout)
 - ✅ **Catchy name and logo** - "Pizza Time" with pizza icon
 - ✅ **Screenshots in README** - Add screenshots to this file
 - ✅ **@Input(), Services, Shared Modules** - All implemented
-- ⚠️ **Node.js/MongoDB backend** - Optional, can be added
+- ✅ **Node.js/MongoDB backend** - Complete backend with MongoDB Atlas and JSON fallback
 
 ### Evaluation Criteria (6 points)
 - ✅ **UI Quality** - Modern, Domino's-inspired design
@@ -249,6 +348,12 @@ npm run build
 - ✅ **Orientation Support** - Optimized layouts for landscape and portrait modes
 - ✅ **Environment Configuration** - Easy switching between localStorage and API
 - ✅ **Custom Validators** - Reusable validation utilities
+- ✅ **Shopping Cart System** - Full cart management with quantities and checkout
+- ✅ **AI Chat Support** - Google Gemini integration for customer support
+- ✅ **Build Your Own Pizza** - Custom pizza builder with toppings selection
+- ✅ **Order History & Details** - Complete order tracking and history
+- ✅ **Settings Page** - App preferences and configuration
+- ✅ **Dual Storage Strategy** - Automatic MongoDB/JSON file switching
 
 See [OPTIONAL_FEATURES.md](OPTIONAL_FEATURES.md) for details on using these features.
 
