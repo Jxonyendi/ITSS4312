@@ -174,6 +174,7 @@ npx cap open android
 - **Login**: Secure authentication with session management
 - **Logout**: Available in Account page
 - **Session Persistence**: Automatically logs you in on app restart
+<img width="1912" height="943" alt="image" src="https://github.com/user-attachments/assets/6d18c71e-fb1e-4872-83aa-e2fd0edae3fd" />
 
 #### Pizza Ordering
 - Browse 6+ specialty pizzas with images
@@ -184,6 +185,7 @@ npx cap open android
 - **Checkout**: Review order, select delivery type, add address
 - Add delivery notes
 - Quick-add button for fast ordering
+<img width="1916" height="945" alt="image" src="https://github.com/user-attachments/assets/a0d0e396-a97f-4ee4-95ba-63d6c958a8f1" />
 
 #### Order Tracking
 - View all active orders
@@ -192,6 +194,7 @@ npx cap open android
 - **Order History**: View all past orders
 - Cancel orders (if not delivered)
 - Real-time status updates
+<img width="1914" height="947" alt="image" src="https://github.com/user-attachments/assets/cbc6328a-8b84-4769-ad4a-fc8854f6654d" />
 
 #### Emergency Features
 - **Location**: Get real device location (requires permissions)
@@ -199,12 +202,14 @@ npx cap open android
 - **Uber Integration**: Deep link to Uber app for rides
 - **Pizza Code Mapping**: Map pizza toppings to emergency actions
 - **Prewritten Messages**: Save custom emergency messages
+<img width="1914" height="947" alt="image" src="https://github.com/user-attachments/assets/60bc8bc7-782d-4fba-a3e8-3ee3106a4aa9" />
 
 #### AI Chat Support
 - **Gemini AI Integration**: Google Generative AI-powered chat widget
 - Available on multiple pages (Home, Orders, Tracker, Contact Us)
 - Context-aware responses about orders, menu, and support
 - Conversation history maintained during session
+<img width="1908" height="947" alt="image" src="https://github.com/user-attachments/assets/068aaace-ffac-49e8-b950-4d93eaead6e6" />
 
 ## Angular Best Practices Implemented
 
@@ -225,6 +230,7 @@ The app includes a **complete Node.js + Express backend** with:
 - **REST API**: Full CRUD operations for users, orders, and contacts
 - **JWT Authentication**: Secure token-based authentication
 - **Environment-based**: Configure via `.env` file
+<img width="1912" height="940" alt="image" src="https://github.com/user-attachments/assets/30b61a73-1799-4a04-96f1-7633ef68e68d" />
 
 ### Backend Setup
 
@@ -296,15 +302,6 @@ POST /api/contact/send-email
 - **MongoDB Mode**: Set `MONGODB_URI` in `.env` → Uses MongoDB Atlas
 - **JSON Mode**: No `MONGODB_URI` → Uses `backend/data/*.json` files
 - **Frontend Fallback**: Set `useBackend: false` → Uses localStorage only
-
-## Screenshots
-
-*Add screenshots of your app here:*
-- Login page
-- Orders page with pizza grid
-- Tracker page
-- Account page
-- etc.
 
 ## Development
 
